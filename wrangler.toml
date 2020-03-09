@@ -1,0 +1,7 @@
+name = "loki-log-shipper"
+type = "webpack"
+account_id = "db64c4e97919d403165aa57f2acf48bc"
+workers_dev = true
+route = ""
+zone_id = ""
+webpack_config = "webpack.config.js"
