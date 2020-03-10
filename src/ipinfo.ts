@@ -14,9 +14,9 @@ export async function ipInfo(ip: string): Promise<Hash<string>> {
   if (res.status == 200) {
     let cachedRes = new Response(res.body, res)
     cachedRes.headers.set('Cache-Control', `max-age=${MAX_AGE}`)
-    cache.put(key, cachedRes)
+    cache.put(key, cachedRes.clone())
 
-    return res.json()
+    return cachedRes.json()
   }
 
   return {}
