@@ -21,7 +21,13 @@ async function flushQueue() {
     }
   }
 
+  let level = 'INFO'
   let labels = `{${arr.join(',')}}`
+  let status = parseInt(batchedEvents[0]['status'])
+
+  if (status > 300) {
+    level = 'ERROR'
+  }
 
   let payload = {
     streams: [
@@ -30,7 +36,7 @@ async function flushQueue() {
         entries: [
           {
             ts: new Date().toISOString(),
-            line: '[INFO] ' + batchedEvents[0]['url'],
+            line: `[${level}] ${batchedEvents[0]['method']} ${batchedEvents[0]['url']}`,
           },
         ],
       },
