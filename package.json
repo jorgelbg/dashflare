@@ -29,5 +29,8 @@
     "webpack": "^4.35.3",
     "webpack-cli": "^3.3.6"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@types/latlon-geohash": "^2.0.0",
+    "latlon-geohash": "^2.0.0"
+  }
 }
