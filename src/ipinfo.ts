@@ -1,3 +1,5 @@
+import Geohash from 'latlon-geohash'
+
 const MAX_AGE = 86400
 
 export async function ipInfo(ip: string): Promise<Hash<string>> {
@@ -11,6 +13,7 @@ export async function ipInfo(ip: string): Promise<Hash<string>> {
   })
 
   const res = await fetch(url)
+
   if (res.status == 200) {
     let cachedRes = new Response(res.body, res)
     cachedRes.headers.set('Cache-Control', `max-age=${MAX_AGE}`)

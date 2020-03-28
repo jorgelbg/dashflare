@@ -1,8 +1,10 @@
-export function toMetadata(headers: any): Hash<string> {
+export function toMetadata(headers: any, prefix: string): Hash<string> {
   let metadata: Hash<string> = {}
 
   Array.from(headers).forEach(([key, value]: any) => {
-    metadata[key] = value
+    key = key.replace(/-/g, '_')
+    value = value.replace(/"/g, '')
+    metadata[`${prefix}_${key}`] = value
   })
 
   return metadata
