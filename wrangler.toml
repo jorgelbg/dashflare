@@ -3,5 +3,5 @@ type = "webpack"
 account_id = "***REMOVED***"
 workers_dev = true
 route = ""
-zone_id = ""
+zone_id = "***REMOVED***"
 webpack_config = "webpack.config.js"
