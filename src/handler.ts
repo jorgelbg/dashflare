@@ -2,10 +2,11 @@ import Geohash from 'latlon-geohash'
 
 import { toMetadata } from './headers'
 import { ipInfo } from './ipinfo'
+import { referrer } from 'inbound'
 
 const DEFAULT_IP = '17.110.220.180'
 const MAX_QUEUE_EVENTS = 1
-const LOKI_HOST = '23.101.74.228:3100'
+const LOKI_HOST = 'loki.jorgelbg.me'
 const LOKI_URL = `http://${LOKI_HOST}/api/prom/push`
 
 let batchedEvents: Array<Hash<any>> = []
@@ -13,7 +14,7 @@ let currentHost: string | null = ''
 
 // flushQueue pushes the existing queue of event's metadata into the backend
 async function flushQueue() {
-  let arr: string[] = ['source="cloudflare"', `host="${currentHost}"`]
+  let arr: string[] = [`host="${currentHost}"`]
   for (let k in batchedEvents[0]) {
     let v = batchedEvents[0][k]
     if (v != undefined) {
@@ -25,7 +26,7 @@ async function flushQueue() {
   let labels = `{${arr.join(',')}}`
   let status = parseInt(batchedEvents[0]['status'])
 
-  if (status > 300) {
+  if (status > 400) {
     level = 'ERROR'
   }
 
@@ -43,7 +44,7 @@ async function flushQueue() {
     ],
   }
 
-  let res = await fetch('http://loki.jorgelbg.me/api/prom/push', {
+  let res = await fetch(LOKI_URL, {
     method: 'POST',
     body: JSON.stringify(payload),
     headers: {
@@ -51,28 +52,30 @@ async function flushQueue() {
     },
   })
 
-  console.log(res.status)
+  console.debug(res.status)
+  batchedEvents = []
 }
 
 export async function handleRequest(event: FetchEvent): Promise<Response> {
   const request = event.request
-
   if (currentHost == '') {
-    currentHost = request.headers.get('host')
+    currentHost = request.headers.get('host') || request.headers.get('hostname')
   }
 
+  // fetch the original request
   console.log(`Fetching origin ${request.url}`)
-  // fetch the original request (i.e proxy)
   const response = await fetch(request)
 
   let labels = {
     method: request.method,
     url: request.url,
     cf: request.cf,
-    // timestamp: new Date().toISOString(),
     status: response.status,
-    ...toMetadata(request.headers, 'req'),
-    ...toMetadata(response.headers, 'res'),
+    referer: request.headers.get('referer'),
+    user_agent: request.headers.get('user-agent'),
+    protocol: request.headers.get('x-forwarded-proto'),
+    // ...toMetadata(request.headers, 'req'),
+    // ...toMetadata(response.headers, 'res'),
   }
 
   let clientIP = request.headers.get('cf-connecting-ip') || DEFAULT_IP
@@ -82,11 +85,28 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   let geohash = Geohash.encode(lat, lon)
 
   delete ip.loc
+  delete ip.timezone
+  delete ip.postal
+  delete ip.org
   ip.lat = lat.toString()
   ip.lon = lon.toString()
   ip.geohash = geohash
 
+  if (request.headers.get('referer')) {
+    let refData: object = await new Promise(resolve => {
+      const ref = request.headers.get('referer')
+      referrer.parse(request.url, ref, function(err: any, info: any) {
+        console.log(JSON.stringify(info['referrer']))
+        resolve(info['referrer'])
+      })
+    })
+
+    labels = { ...labels, ...refData }
+  }
+
   labels = { ...labels, ...ip }
+  console.log(JSON.stringify(labels))
+
   batchedEvents.push(labels)
   event.waitUntil(flushQueue())
 

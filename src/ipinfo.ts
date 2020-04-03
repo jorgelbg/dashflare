@@ -6,11 +6,16 @@ export async function ipInfo(ip: string): Promise<Hash<string>> {
   let cache = await caches.open('ips')
 
   const url = `http://ipinfo.io/${ip}/json?token=${IPINFO_TOKEN}`
-
   const key = new Request(url, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   })
+
+  let cachedResponse = await cache.match(key)
+
+  if (cachedResponse) {
+    return cachedResponse.json()
+  }
 
   const res = await fetch(url)
 
