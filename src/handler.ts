@@ -69,7 +69,6 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   let labels = {
     method: request.method,
     url: request.url,
-    cf: request.cf,
     status: response.status,
     referer: request.headers.get('referer'),
     user_agent: request.headers.get('user-agent'),
