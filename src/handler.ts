@@ -4,10 +4,15 @@ import { toMetadata } from './headers'
 import { ipInfo } from './ipinfo'
 import { referrer } from 'inbound'
 
+// These settings will be provided as environment variables or SECRETS.
+// Other option is by shipping a full featured Cloudflare App
 const DEFAULT_IP = '17.110.220.180'
 const MAX_QUEUE_EVENTS = 1
 const LOKI_HOST = 'loki.jorgelbg.me'
 const LOKI_URL = `http://${LOKI_HOST}/api/prom/push`
+
+// Used in a different file but also should be configurable
+// IPINFO_TOKEN
 
 let batchedEvents: Array<Hash<any>> = []
 let currentHost: string | null = ''
