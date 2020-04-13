@@ -37,6 +37,10 @@ async function flushQueue() {
   let labels = `{${arr.join(',')}}`
   let status = parseInt(batchedEvents[0]['status'])
 
+  if (status > 300) {
+    level = 'WARN'
+  }
+
   if (status > 400) {
     level = 'ERROR'
   }
