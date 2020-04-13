@@ -5,3 +5,6 @@ workers_dev = true
 route = ""
 zone_id = "***REMOVED***"
 webpack_config = "webpack.config.js"
+
+[env.dev]
+webpack_config = "webpack.dev.config.js"

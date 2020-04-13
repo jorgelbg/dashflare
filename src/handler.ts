@@ -16,6 +16,9 @@ const EXCLUDE_CSS = true
 const EXCLUDE_JAVASCRIPT = true
 const LOG_ALL_HEADERS = false
 
+let options = INSTALL_OPTIONS || {}
+console.log(options)
+
 // Used in a different file but also should be configurable
 // IPINFO_TOKEN
 const LOKI_URL = `http://${LOKI_HOST}/api/prom/push`

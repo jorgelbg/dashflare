@@ -11,7 +11,7 @@
     "test": "npm run test:clean && npm run transpile && mocha --require source-map-support/register --recursive transpiled/test",
     "transpile": "tsc --project ./test"
   },
-  "author": "Jorge Luis Betancourt Gonzalez <jorge-luis.betancourt@trivago.com>",
+  "author": "Jorge Luis Betancourt Gonzalez <gh@jorgelbg.me>",
   "license": "MIT OR Apache-2.0",
   "devDependencies": {
     "@cloudflare/workers-types": "^1.0.1",
