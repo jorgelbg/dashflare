@@ -3,16 +3,22 @@ import Geohash from 'latlon-geohash'
 import { toMetadata } from './headers'
 import { ipInfo } from './ipinfo'
 import { referrer } from 'inbound'
+import { URL } from '@cliqz/url-parser'
+import url from '@cliqz/url-parser/build/types/lib/url'
 
 // These settings will be provided as environment variables or SECRETS.
 // Other option is by shipping a full featured Cloudflare App
 const DEFAULT_IP = '17.110.220.180'
 const MAX_QUEUE_EVENTS = 1
 const LOKI_HOST = 'loki.jorgelbg.me'
-const LOKI_URL = `http://${LOKI_HOST}/api/prom/push`
+const EXCLUDE_IMAGES = true
+const EXCLUDE_CSS = true
+const EXCLUDE_JAVASCRIPT = true
+const LOG_ALL_HEADERS = false
 
 // Used in a different file but also should be configurable
 // IPINFO_TOKEN
+const LOKI_URL = `http://${LOKI_HOST}/api/prom/push`
 
 let batchedEvents: Array<Hash<any>> = []
 let currentHost: string | null = ''
@@ -71,6 +77,8 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   console.log(`Fetching origin ${request.url}`)
   const response = await fetch(request)
 
+  let parsed = new URL(request.url)
+
   let labels = {
     method: request.method,
     url: request.url,
@@ -78,8 +86,19 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     referer: request.headers.get('referer'),
     user_agent: request.headers.get('user-agent'),
     protocol: request.headers.get('x-forwarded-proto'),
-    // ...toMetadata(request.headers, 'req'),
-    // ...toMetadata(response.headers, 'res'),
+    domain: parsed.domain,
+    origin: parsed.origin,
+    path: parsed.path,
+    hash: parsed.hash,
+    query: parsed.search,
+  }
+
+  if (LOG_ALL_HEADERS) {
+    labels = {
+      ...labels,
+      ...toMetadata(request.headers, 'req'),
+      ...toMetadata(response.headers, 'res'),
+    }
   }
 
   let clientIP = request.headers.get('cf-connecting-ip') || DEFAULT_IP
@@ -109,7 +128,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   }
 
   labels = { ...labels, ...ip }
-  console.log(JSON.stringify(labels))
+  // console.log(JSON.stringify(labels))
 
   batchedEvents.push(labels)
   event.waitUntil(flushQueue())
