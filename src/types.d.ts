@@ -11,5 +11,5 @@ declare global {
   let IPINFO_TOKEN: string
 
   // INSTALL_OPTIONS is provided by cloudflare environment
-  let INSTALL_OPTIONS: any | undefined
+  let INSTALL_OPTIONS: any
 }
