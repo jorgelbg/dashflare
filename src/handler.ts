@@ -5,6 +5,7 @@ import { ipInfo } from './ipinfo'
 import { referrer } from 'inbound'
 import { URL } from '@cliqz/url-parser'
 import { getName } from 'country-list'
+import { UAParser } from 'ua-parser-js'
 
 // These settings will be provided as environment variables or SECRETS.
 // Other option is by shipping a full featured Cloudflare App
@@ -17,7 +18,7 @@ const EXCLUDE_JAVASCRIPT = false
 const LOG_ALL_HEADERS = false
 
 const JAVASCRIPT_REGEX = /\.js$/
-const IMAGE_REGEX = /\.(?:png|jpg|jpeg|webp|gif)$/
+const IMAGE_REGEX = /\.(?:png|jpg|jpeg|webp|gif|ico|svg|webmanifest)$/
 const CSS_REGEX = /\.css$/
 
 // TODO: Currently a Cloudflare app cannot use edge workers
@@ -32,6 +33,8 @@ const LOKI_URL = `http://${LOKI_HOST}/api/prom/push`
 
 let batchedEvents: Array<Hash<any>> = []
 let currentHost: string | null = ''
+
+const parser = new UAParser()
 
 // flushQueue pushes the existing queue of event's metadata into the backend
 async function flushQueue() {
@@ -91,26 +94,27 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   console.log(`Fetching origin ${request.url}`)
   const response = await fetch(request)
 
-  if (EXCLUDE_JAVASCRIPT && JAVASCRIPT_REGEX.test(request.url)) {
-    return response
-  }
+  // if (EXCLUDE_JAVASCRIPT && JAVASCRIPT_REGEX.test(request.url)) {
+  //   return response
+  // }
 
-  if (EXCLUDE_CSS && CSS_REGEX.test(request.url)) {
-    return response
-  }
+  // if (EXCLUDE_CSS && CSS_REGEX.test(request.url)) {
+  //   return response
+  // }
 
-  if (EXCLUDE_IMAGES && IMAGE_REGEX.test(request.url)) {
-    return response
-  }
+  // if (EXCLUDE_IMAGES && IMAGE_REGEX.test(request.url)) {
+  //   return response
+  // }
 
   let parsed = new URL(request.url)
+  let userAgent = request.headers.get('user-agent')
 
   let labels = {
     method: request.method,
     url: request.url,
     status: response.status,
     referer: request.headers.get('referer'),
-    user_agent: request.headers.get('user-agent'),
+    user_agent: userAgent,
     protocol: request.headers.get('x-forwarded-proto'),
     domain: parsed.domain,
     origin: parsed.origin,
@@ -154,8 +158,18 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     labels = { ...labels, ...refData }
   }
 
+  // const userAgent =
+  // 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko)
+  // Chrome/69.0.3497.81 Safari/537.36'
+  // const userAgent =
+  //   'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25 (compatible; Googlebot-Mobile/2.1; +http://www.google.com/bot.html)'
+  parser.setUA(`${userAgent}`)
+  console.log(parser.getBrowser())
+  console.log(parser.getDevice())
+  console.log(parser.getOS())
+
   labels = { ...labels, ...ip }
-  // console.log(JSON.stringify(labels))
+  console.log(JSON.stringify(labels))
 
   batchedEvents.push(labels)
   event.waitUntil(flushQueue())
