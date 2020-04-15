@@ -33,10 +33,12 @@
     "@cliqz/url-parser": "^1.1.3",
     "@types/country-list": "^2.1.0",
     "@types/latlon-geohash": "^2.0.0",
+    "@types/ua-parser-js": "^0.7.33",
     "country-list": "^2.2.0",
     "file-type": "^14.1.4",
     "inbound": "0.0.6",
     "latlon-geohash": "^2.0.0",
-    "tldextract": "0.0.5"
+    "tldextract": "0.0.5",
+    "ua-parser-js": "^0.7.21"
   }
 }
