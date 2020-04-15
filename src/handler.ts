@@ -4,18 +4,23 @@ import { toMetadata } from './headers'
 import { ipInfo } from './ipinfo'
 import { referrer } from 'inbound'
 import { URL } from '@cliqz/url-parser'
-import url from '@cliqz/url-parser/build/types/lib/url'
+import { getName } from 'country-list'
 
 // These settings will be provided as environment variables or SECRETS.
 // Other option is by shipping a full featured Cloudflare App
 const DEFAULT_IP = '17.110.220.180'
 const MAX_QUEUE_EVENTS = 1
 const LOKI_HOST = 'loki.jorgelbg.me'
-const EXCLUDE_IMAGES = true
-const EXCLUDE_CSS = true
-const EXCLUDE_JAVASCRIPT = true
+const EXCLUDE_IMAGES = false
+const EXCLUDE_CSS = false
+const EXCLUDE_JAVASCRIPT = false
 const LOG_ALL_HEADERS = false
 
+const JAVASCRIPT_REGEX = /\.js$/
+const IMAGE_REGEX = /\.(?:png|jpg|jpeg|webp|gif)$/
+const CSS_REGEX = /\.css$/
+
+// TODO: Currently a Cloudflare app cannot use edge workers
 if (typeof INSTALL_OPTIONS !== 'undefined') {
   let options = INSTALL_OPTIONS || {}
   console.log(options)
@@ -86,6 +91,18 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   console.log(`Fetching origin ${request.url}`)
   const response = await fetch(request)
 
+  if (EXCLUDE_JAVASCRIPT && JAVASCRIPT_REGEX.test(request.url)) {
+    return response
+  }
+
+  if (EXCLUDE_CSS && CSS_REGEX.test(request.url)) {
+    return response
+  }
+
+  if (EXCLUDE_IMAGES && IMAGE_REGEX.test(request.url)) {
+    return response
+  }
+
   let parsed = new URL(request.url)
 
   let labels = {
@@ -123,6 +140,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   ip.lat = lat.toString()
   ip.lon = lon.toString()
   ip.geohash = geohash
+  ip.countryName = `${getName(ip.country)}`
 
   if (request.headers.get('referer')) {
     let refData: object = await new Promise(resolve => {
