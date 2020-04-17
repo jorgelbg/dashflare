@@ -94,20 +94,22 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   console.log(`Fetching origin ${request.url}`)
   const response = await fetch(request)
 
-  // if (EXCLUDE_JAVASCRIPT && JAVASCRIPT_REGEX.test(request.url)) {
-  //   return response
-  // }
+  if (EXCLUDE_JAVASCRIPT && JAVASCRIPT_REGEX.test(request.url)) {
+    return response
+  }
 
-  // if (EXCLUDE_CSS && CSS_REGEX.test(request.url)) {
-  //   return response
-  // }
+  if (EXCLUDE_CSS && CSS_REGEX.test(request.url)) {
+    return response
+  }
 
-  // if (EXCLUDE_IMAGES && IMAGE_REGEX.test(request.url)) {
-  //   return response
-  // }
+  if (EXCLUDE_IMAGES && IMAGE_REGEX.test(request.url)) {
+    return response
+  }
 
   let parsed = new URL(request.url)
   let userAgent = request.headers.get('user-agent')
+
+  parser.setUA(`${userAgent}`)
 
   let labels = {
     method: request.method,
@@ -121,6 +123,11 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     path: parsed.path,
     hash: parsed.hash,
     query: parsed.search,
+    browser: parser.getBrowser().name,
+    browser_version: parser.getBrowser().major,
+    os: parser.getOS().name,
+    os_version: parser.getOS().version,
+    device_type: parser.getDevice().type,
   }
 
   if (LOG_ALL_HEADERS) {
@@ -158,15 +165,10 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     labels = { ...labels, ...refData }
   }
 
-  // const userAgent =
-  // 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko)
-  // Chrome/69.0.3497.81 Safari/537.36'
+  // userAgent =
+  //   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.81 Safari/537.36'
   // const userAgent =
   //   'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25 (compatible; Googlebot-Mobile/2.1; +http://www.google.com/bot.html)'
-  parser.setUA(`${userAgent}`)
-  console.log(parser.getBrowser())
-  console.log(parser.getDevice())
-  console.log(parser.getOS())
 
   labels = { ...labels, ...ip }
   console.log(JSON.stringify(labels))
