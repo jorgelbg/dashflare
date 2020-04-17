@@ -151,7 +151,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   ip.lat = lat.toString()
   ip.lon = lon.toString()
   ip.geohash = geohash
-  ip.countryName = `${getName(ip.country)}`
+  ip.country_name = `${getName(ip.country)}`
 
   if (request.headers.get('referer')) {
     let refData: object = await new Promise(resolve => {
@@ -171,7 +171,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   //   'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25 (compatible; Googlebot-Mobile/2.1; +http://www.google.com/bot.html)'
 
   labels = { ...labels, ...ip }
-  console.log(JSON.stringify(labels))
+  // console.log(JSON.stringify(labels))
 
   batchedEvents.push(labels)
   event.waitUntil(flushQueue())
