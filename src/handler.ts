@@ -33,6 +33,7 @@ const LOKI_URL = `http://${LOKI_HOST}/api/prom/push`
 
 let batchedEvents: Array<Hash<any>> = []
 let currentHost: string | null = ''
+let ipInfoQuotaReached = false
 
 const parser = new UAParser()
 
@@ -131,6 +132,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   }
 
   if (LOG_ALL_HEADERS) {
+    // This might need to increase the max limit of labels on the Loki side
     labels = {
       ...labels,
       ...toMetadata(request.headers, 'req'),
@@ -139,19 +141,30 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   }
 
   let clientIP = request.headers.get('cf-connecting-ip') || DEFAULT_IP
-  const ip = await ipInfo(clientIP)
 
-  let [lat, lon] = ip.loc.split(',').map(n => parseFloat(n))
-  let geohash = Geohash.encode(lat, lon)
+  if (ipInfoQuotaReached == false) {
+    try {
+      const ip = await ipInfo(clientIP)
 
-  delete ip.loc
-  delete ip.timezone
-  delete ip.postal
-  delete ip.org
-  ip.lat = lat.toString()
-  ip.lon = lon.toString()
-  ip.geohash = geohash
-  ip.country_name = `${getName(ip.country)}`
+      let [lat, lon] = ip.loc.split(',').map(n => parseFloat(n))
+      let geohash = Geohash.encode(lat, lon)
+
+      delete ip.loc
+      delete ip.timezone
+      delete ip.postal
+      delete ip.org
+      ip.lat = lat.toString()
+      ip.lon = lon.toString()
+      ip.geohash = geohash
+      ip.country_name = `${getName(ip.country)}`
+
+      labels = { ...labels, ...ip }
+    } catch (error) {
+      // We catched 429 Too Many Requests, this means that we reached our current
+      // ipinfo quota. Avoid making extra requests.
+      ipInfoQuotaReached = true
+    }
+  }
 
   if (request.headers.get('referer')) {
     let refData: object = await new Promise(resolve => {
@@ -170,8 +183,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   // const userAgent =
   //   'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25 (compatible; Googlebot-Mobile/2.1; +http://www.google.com/bot.html)'
 
-  labels = { ...labels, ...ip }
-  // console.log(JSON.stringify(labels))
+  console.log(JSON.stringify(labels))
 
   batchedEvents.push(labels)
   event.waitUntil(flushQueue())
