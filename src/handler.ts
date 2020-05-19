@@ -7,8 +7,7 @@ import { URL } from '@cliqz/url-parser'
 import { getName } from 'country-list'
 import { UAParser } from 'ua-parser-js'
 
-// These settings will be provided as environment variables or SECRETS.
-// Other option is by shipping a full featured Cloudflare App
+// These settings will be provided as environment variables
 const DEFAULT_IP = '17.110.220.180'
 const MAX_QUEUE_EVENTS = 1
 const LOKI_HOST = 'loki.jorgelbg.me'
@@ -78,6 +77,7 @@ async function flushQueue() {
     body: JSON.stringify(payload),
     headers: {
       'Content-Type': 'application/json',
+      'X-Scope-OrgID': CLIENT_ID,
     },
   })
 
