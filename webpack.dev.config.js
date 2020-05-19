@@ -4,8 +4,9 @@ const webpack = require('webpack')
 const mode = 'development'
 const INSTALL_OPTIONS = JSON.stringify(require('./stage-install'))
 const ipInfoToken = JSON.stringify(process.env.IPINFO || 'not-yet-set')
+const clientId = JSON.stringify(process.env.CLIENT_ID || 'not-yet-set')
 
-console.log({ ipInfoToken })
+console.log({ ipInfoToken, clientId })
 
 module.exports = {
   output: {
@@ -18,6 +19,7 @@ module.exports = {
     new webpack.DefinePlugin({
       INSTALL_OPTIONS: INSTALL_OPTIONS,
       IPINFO_TOKEN: ipInfoToken,
+      CLIENT_ID: clientId,
     }),
   ],
   resolve: {
