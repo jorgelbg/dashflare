@@ -5,8 +5,9 @@ const mode = 'development'
 const INSTALL_OPTIONS = JSON.stringify(require('./stage-install'))
 const ipInfoToken = JSON.stringify(process.env.IPINFO || 'not-yet-set')
 const clientId = JSON.stringify(process.env.CLIENT_ID || 'not-yet-set')
+const lokiHost = JSON.stringify(process.env.LOKI_HOST || 'loki.jorgelbg.me')
 
-console.log({ ipInfoToken, clientId })
+console.log({ ipInfoToken, clientId, lokiHost })
 
 module.exports = {
   output: {
@@ -20,6 +21,7 @@ module.exports = {
       INSTALL_OPTIONS: INSTALL_OPTIONS,
       IPINFO_TOKEN: ipInfoToken,
       CLIENT_ID: clientId,
+      LOKI_HOST: lokiHost,
     }),
   ],
   resolve: {

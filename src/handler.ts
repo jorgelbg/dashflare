@@ -7,14 +7,15 @@ import { URL } from '@cliqz/url-parser'
 import { getName } from 'country-list'
 import { UAParser } from 'ua-parser-js'
 
-// These settings will be provided as environment variables
 const DEFAULT_IP = '17.110.220.180'
+// These settings will be provided as environment variables
 const MAX_QUEUE_EVENTS = 1
 const LOKI_HOST = 'loki.jorgelbg.me'
 const EXCLUDE_IMAGES = false
 const EXCLUDE_CSS = false
 const EXCLUDE_JAVASCRIPT = false
 const LOG_ALL_HEADERS = false
+const REMOVE_IP = false
 
 const JAVASCRIPT_REGEX = /\.js$/
 const IMAGE_REGEX = /\.(?:png|jpg|jpeg|webp|gif|ico|svg|webmanifest)$/
@@ -153,6 +154,11 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
       delete ip.timezone
       delete ip.postal
       delete ip.org
+
+      if (REMOVE_IP) {
+        delete ip.ip
+      }
+
       ip.lat = lat.toString()
       ip.lon = lon.toString()
       ip.geohash = geohash

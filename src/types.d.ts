@@ -13,6 +13,11 @@ declare global {
   // The client id
   let CLIENT_ID: string
 
+  // Host where loki is hosted.
+  // Cannot be an IP address, nor contain a custom port (other than 80/443) since it is currently not
+  // supported by Cloudflare workers.
+  let LOKI_HOST: string
+
   // INSTALL_OPTIONS is provided by cloudflare environment
   let INSTALL_OPTIONS: any
 }
