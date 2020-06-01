@@ -7,7 +7,6 @@ import { URL } from '@cliqz/url-parser'
 import { getName } from 'country-list'
 import { UAParser } from 'ua-parser-js'
 
-const DEFAULT_IP = '17.110.220.180'
 // These settings will be provided as environment variables
 const MAX_QUEUE_EVENTS = 1
 const LOKI_HOST = 'loki.jorgelbg.me'
@@ -141,7 +140,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     }
   }
 
-  let clientIP = request.headers.get('cf-connecting-ip') || DEFAULT_IP
+  let clientIP = request.headers.get('cf-connecting-ip')
 
   if (ipInfoQuotaReached == false) {
     try {
