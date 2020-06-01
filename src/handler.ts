@@ -9,7 +9,6 @@ import { UAParser } from 'ua-parser-js'
 
 // These settings will be provided as environment variables
 const MAX_QUEUE_EVENTS = 1
-const LOKI_HOST = 'loki.jorgelbg.me'
 const EXCLUDE_IMAGES = false
 const EXCLUDE_CSS = false
 const EXCLUDE_JAVASCRIPT = false

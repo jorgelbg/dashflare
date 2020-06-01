@@ -1,3 +1,4 @@
+.envrc
 dist
 node_modules
 transpiled
