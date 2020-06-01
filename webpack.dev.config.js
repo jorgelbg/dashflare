@@ -2,7 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 
 const mode = 'development'
-const INSTALL_OPTIONS = JSON.stringify(require('./stage-install'))
+// const INSTALL_OPTIONS = JSON.stringify(require('./mock-install'))
 const ipInfoToken = JSON.stringify(process.env.IPINFO || 'not-yet-set')
 const clientId = JSON.stringify(process.env.CLIENT_ID || 'not-yet-set')
 const lokiHost = JSON.stringify(process.env.LOKI_HOST || 'loki.jorgelbg.me')
@@ -18,7 +18,6 @@ module.exports = {
   mode,
   plugins: [
     new webpack.DefinePlugin({
-      INSTALL_OPTIONS: INSTALL_OPTIONS,
       IPINFO_TOKEN: ipInfoToken,
       CLIENT_ID: clientId,
       LOKI_HOST: lokiHost,
