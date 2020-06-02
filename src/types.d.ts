@@ -18,6 +18,6 @@ declare global {
   // supported by Cloudflare workers.
   let LOKI_HOST: string
 
-  // INSTALL_OPTIONS is provided by cloudflare environment
-  let INSTALL_OPTIONS: any
+  // OPTIONS is fetched from an environment variable set in the worker configuration
+  let OPTIONS: any
 }
