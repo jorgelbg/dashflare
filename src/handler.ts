@@ -9,25 +9,22 @@ import { UAParser } from 'ua-parser-js'
 
 // These settings will be provided as environment variables
 const MAX_QUEUE_EVENTS = 1
-const EXCLUDE_IMAGES = false
-const EXCLUDE_CSS = false
-const EXCLUDE_JAVASCRIPT = false
-const LOG_ALL_HEADERS = false
-const REMOVE_IP = false
+const DEBUG_HEADERS = false
 
 const JAVASCRIPT_REGEX = /\.js$/
 const IMAGE_REGEX = /\.(?:png|jpg|jpeg|webp|gif|ico|svg|webmanifest)$/
 const CSS_REGEX = /\.css$/
 
-// TODO: Currently a Cloudflare app cannot use edge workers
-if (typeof INSTALL_OPTIONS !== 'undefined') {
-  let options = INSTALL_OPTIONS || {}
-  console.log(options)
-}
-
 // Used in a different file but also should be configurable
 // IPINFO_TOKEN
 const LOKI_URL = `http://${LOKI_HOST}/api/prom/push`
+
+const EXCLUDE = JSON.parse(OPTIONS) || {
+  css: false,
+  images: false,
+  js: false,
+  ip: false,
+}
 
 let batchedEvents: Array<Hash<any>> = []
 let currentHost: string | null = ''
@@ -94,15 +91,15 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   console.log(`Fetching origin ${request.url}`)
   const response = await fetch(request)
 
-  if (EXCLUDE_JAVASCRIPT && JAVASCRIPT_REGEX.test(request.url)) {
+  if (EXCLUDE.js && JAVASCRIPT_REGEX.test(request.url)) {
     return response
   }
 
-  if (EXCLUDE_CSS && CSS_REGEX.test(request.url)) {
+  if (EXCLUDE.css && CSS_REGEX.test(request.url)) {
     return response
   }
 
-  if (EXCLUDE_IMAGES && IMAGE_REGEX.test(request.url)) {
+  if (EXCLUDE.images && IMAGE_REGEX.test(request.url)) {
     return response
   }
 
@@ -130,7 +127,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     device_type: parser.getDevice().type,
   }
 
-  if (LOG_ALL_HEADERS) {
+  if (DEBUG_HEADERS) {
     // This might need to increase the max limit of labels on the Loki side
     labels = {
       ...labels,
@@ -139,9 +136,9 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     }
   }
 
-  let clientIP = request.headers.get('cf-connecting-ip')
+  let clientIP = request.headers.get('cf-connecting-ip') || ''
 
-  if (ipInfoQuotaReached == false) {
+  if (ipInfoQuotaReached == false && clientIP.length > 0) {
     try {
       const ip = await ipInfo(clientIP)
 
@@ -153,7 +150,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
       delete ip.postal
       delete ip.org
 
-      if (REMOVE_IP) {
+      if (EXCLUDE.ip) {
         delete ip.ip
       }
 
