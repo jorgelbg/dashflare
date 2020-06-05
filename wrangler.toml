@@ -5,6 +5,7 @@ workers_dev = true
 route = ""
 zone_id = "***REMOVED***"
 webpack_config = "webpack.config.js"
+vars = { OPTIONS = '{"css":false,"images":false,"js":false,"ip":false}' }
 
 [env.dev]
 webpack_config = "webpack.dev.config.js"

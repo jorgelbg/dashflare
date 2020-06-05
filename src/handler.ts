@@ -36,6 +36,7 @@ const parser = new UAParser()
 async function flushQueue() {
   let arr: string[] = [`host="${currentHost}"`]
   for (let k in batchedEvents[0]) {
+    if (k == 'url') continue
     let v = batchedEvents[0][k]
     if (v != undefined) {
       arr.push(`${k}="${v}"`)
@@ -183,8 +184,6 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   //   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.81 Safari/537.36'
   // const userAgent =
   //   'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25 (compatible; Googlebot-Mobile/2.1; +http://www.google.com/bot.html)'
-
-  console.log(JSON.stringify(labels))
 
   batchedEvents.push(labels)
   event.waitUntil(flushQueue())
