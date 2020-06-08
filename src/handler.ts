@@ -36,6 +36,7 @@ const parser = new UAParser()
 async function flushQueue() {
   let arr: string[] = [`host="${currentHost}"`]
   for (let k in batchedEvents[0]) {
+    // Avoid putting the url in the label set
     if (k == 'url') continue
     let v = batchedEvents[0][k]
     if (v != undefined) {
