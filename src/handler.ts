@@ -36,8 +36,8 @@ const parser = new UAParser()
 async function flushQueue() {
   let arr: string[] = [`host="${currentHost}"`]
   for (let k in batchedEvents[0]) {
-    // Avoid putting the url in the label set
-    if (k == 'url') continue
+    // Avoid putting the url, referer link in the label set
+    if (k == 'url' || k == 'referer') continue
     let v = batchedEvents[0][k]
     if (v != undefined) {
       arr.push(`${k}="${v}"`)
@@ -63,7 +63,7 @@ async function flushQueue() {
         entries: [
           {
             ts: new Date().toISOString(),
-            line: `[${level}] ${batchedEvents[0]['method']} ${batchedEvents[0]['url']}`,
+            line: `[${level}] ${batchedEvents[0]['method']} ${batchedEvents[0]['url']} referer=${batchedEvents[0]['referer']}`,
           },
         ],
       },
@@ -170,7 +170,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   }
 
   if (request.headers.get('referer')) {
-    let refData: object = await new Promise(resolve => {
+    let refData: any = await new Promise(resolve => {
       const ref = request.headers.get('referer')
       referrer.parse(request.url, ref, function(err: any, info: any) {
         console.log(JSON.stringify(info['referrer']))
@@ -178,7 +178,9 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
       })
     })
 
-    labels = { ...labels, ...refData }
+    const { type, network, client } = refData
+
+    labels = { ...labels, ...{ type, network, client } }
   }
 
   // userAgent =
