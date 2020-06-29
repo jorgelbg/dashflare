@@ -23,7 +23,7 @@ const EXCLUDE = JSON.parse(OPTIONS) || {
   css: false,
   images: false,
   js: false,
-  ip: false,
+  ip: true,
 }
 
 let batchedEvents: Array<Hash<any>> = []
