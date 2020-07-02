@@ -23,7 +23,7 @@ module.exports = {
     filename: `worker.${mode}.js`,
     path: path.join(__dirname, 'dist'),
   },
-  devtool: 'source-map',
+  devtool: 'none',
   mode,
   plugins: [
     new webpack.DefinePlugin({
@@ -46,7 +46,6 @@ module.exports = {
           transpileOnly: true,
         },
       },
-      { enforce: 'pre', test: /\.js$/, loader: 'source-map-loader' },
     ],
   },
   node: {
