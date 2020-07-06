@@ -30,6 +30,8 @@ let batchedEvents: Array<Hash<any>> = []
 let currentHost: string | null = ''
 let ipInfoQuotaReached = false
 
+const SKIP_LABELS = ['url', 'referer', 'user_agent']
+
 const parser = new UAParser()
 
 // flushQueue pushes the existing queue of event's metadata into the backend
@@ -37,7 +39,7 @@ async function flushQueue() {
   let arr: string[] = [`host="${currentHost}"`]
   for (let k in batchedEvents[0]) {
     // Avoid putting the url & referer links in the label set
-    if (k == 'url' || k == 'referer') continue
+    if (SKIP_LABELS.includes(k)) continue
     let v = batchedEvents[0][k]
     if (v != undefined) {
       arr.push(`${k}="${v}"`)
@@ -63,7 +65,7 @@ async function flushQueue() {
         entries: [
           {
             ts: new Date().toISOString(),
-            line: `[${level}] ${batchedEvents[0]['method']} ${batchedEvents[0]['url']} referer=${batchedEvents[0]['referer']}`,
+            line: `[${level}] ${batchedEvents[0]['method']} ${batchedEvents[0]['url']} referer=${batchedEvents[0]['referer']} user_agent=${batchedEvents[0]['user_agent']}`,
           },
         ],
       },
