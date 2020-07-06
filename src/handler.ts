@@ -11,9 +11,9 @@ import { UAParser } from 'ua-parser-js'
 const MAX_QUEUE_EVENTS = 1
 const DEBUG_HEADERS = false
 
-const JAVASCRIPT_REGEX = /\.js$/
-const IMAGE_REGEX = /\.(?:png|jpg|jpeg|webp|gif|ico|svg|webmanifest)$/
-const CSS_REGEX = /\.css$/
+const JAVASCRIPT_REGEX = /\.js/
+const IMAGE_REGEX = /\.(?:png|jpg|jpeg|webp|gif|ico|svg|webmanifest)/
+const CSS_REGEX = /\.css/
 
 // Used in a different file but also should be configurable
 // IPINFO_TOKEN
