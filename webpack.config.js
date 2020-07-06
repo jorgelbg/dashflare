@@ -23,6 +23,15 @@ module.exports = {
         },
       },
       { enforce: 'pre', test: /\.js$/, loader: 'source-map-loader' },
+      {
+        test: /\.ya?ml$/,
+        use: [
+          {
+            loader: '@friends-of-js/yaml-loader',
+            options: { useNodeEnv: false },
+          },
+        ],
+      },
     ],
   },
   node: {

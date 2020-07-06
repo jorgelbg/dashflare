@@ -36,7 +36,7 @@ const parser = new UAParser()
 async function flushQueue() {
   let arr: string[] = [`host="${currentHost}"`]
   for (let k in batchedEvents[0]) {
-    // Avoid putting the url, referer link in the label set
+    // Avoid putting the url & referer links in the label set
     if (k == 'url' || k == 'referer') continue
     let v = batchedEvents[0][k]
     if (v != undefined) {

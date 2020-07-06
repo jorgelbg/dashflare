@@ -46,6 +46,15 @@ module.exports = {
           transpileOnly: true,
         },
       },
+      {
+        test: /\.ya?ml$/,
+        use: [
+          {
+            loader: '@friends-of-js/yaml-loader',
+            options: { useNodeEnv: false },
+          },
+        ],
+      },
     ],
   },
   node: {
