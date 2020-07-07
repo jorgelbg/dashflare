@@ -34,7 +34,11 @@ let batchedEvents: Array<Hash<any>> = []
 let currentHost: string | null = ''
 let ipInfoQuotaReached = false
 
-const SKIP_LABELS = ['url', 'referer', 'user_agent', 'hostname', 'ip']
+const SKIP_LABELS = new Set(['url', 'referer', 'user_agent', 'hostname', 'ip'])
+
+if (EXCLUDE.ip) {
+  SKIP_LABELS.add('ip')
+}
 
 const parser = new UAParser()
 
@@ -43,7 +47,7 @@ async function flushQueue() {
   let arr: string[] = [`host="${currentHost}"`]
   for (let k in batchedEvents[0]) {
     // Avoid putting the url & referer links in the label set
-    if (SKIP_LABELS.includes(k)) continue
+    if (SKIP_LABELS.has(k)) continue
     let v = batchedEvents[0][k]
     if (v != undefined) {
       arr.push(`${k}="${v}"`)
@@ -161,10 +165,6 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
       delete ip.timezone
       delete ip.postal
       delete ip.org
-
-      // if (EXCLUDE.ip) {
-      //   delete ip.ip
-      // }
 
       ip.geohash = geohash
       ip.country_name = `${getName(ip.country)}`
