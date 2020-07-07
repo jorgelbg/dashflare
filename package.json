@@ -41,6 +41,7 @@
     "file-type": "^14.6.2",
     "inbound": "0.0.6",
     "latlon-geohash": "^2.0.0",
+    "siphash": "^1.1.0",
     "tldextract": "0.0.5",
     "ua-parser-js": "^0.7.21"
   }

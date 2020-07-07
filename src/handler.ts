@@ -6,6 +6,10 @@ import { referrer } from 'inbound'
 import { URL } from '@cliqz/url-parser'
 import { getName } from 'country-list'
 import { UAParser } from 'ua-parser-js'
+import { hash_hex, string_to_u8 } from 'siphash'
+import { parse } from './referer'
+
+let sessionKey = string_to_u8(FINGERPRINT)
 
 // These settings will be provided as environment variables
 const MAX_QUEUE_EVENTS = 1
@@ -30,7 +34,7 @@ let batchedEvents: Array<Hash<any>> = []
 let currentHost: string | null = ''
 let ipInfoQuotaReached = false
 
-const SKIP_LABELS = ['url', 'referer', 'user_agent']
+const SKIP_LABELS = ['url', 'referer', 'user_agent', 'hostname', 'ip']
 
 const parser = new UAParser()
 
@@ -49,6 +53,10 @@ async function flushQueue() {
   let level = 'INFO'
   let labels = `{${arr.join(',')}}`
   let status = parseInt(batchedEvents[0]['status'])
+  let session = hash_hex(
+    sessionKey,
+    `${batchedEvents[0]['user_agent']}${batchedEvents[0]['ip']}${batchedEvents[0]['domain']}`,
+  )
 
   if (status > 300) {
     level = 'WARN'
@@ -65,7 +73,7 @@ async function flushQueue() {
         entries: [
           {
             ts: new Date().toISOString(),
-            line: `[${level}] ${batchedEvents[0]['method']} ${batchedEvents[0]['url']} referer=${batchedEvents[0]['referer']} user_agent=${batchedEvents[0]['user_agent']}`,
+            line: `[${level}] ${batchedEvents[0]['method']} ${batchedEvents[0]['url']} referer=${batchedEvents[0]['referer']} user_agent=${batchedEvents[0]['user_agent']} hostname=${batchedEvents[0]['hostname']} session_id=${session}`,
           },
         ],
       },
@@ -154,9 +162,9 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
       delete ip.postal
       delete ip.org
 
-      if (EXCLUDE.ip) {
-        delete ip.ip
-      }
+      // if (EXCLUDE.ip) {
+      //   delete ip.ip
+      // }
 
       ip.geohash = geohash
       ip.country_name = `${getName(ip.country)}`

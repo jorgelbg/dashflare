@@ -15,8 +15,17 @@ const lokiHost = JSON.stringify(process.env.LOKI_HOST || 'loki.jorgelbg.me')
 const excludeOptions = JSON.stringify(
   process.env.WORKER_OPTIONS || defaultExclude,
 )
+const sessionHash = JSON.stringify(
+  process.env.FINGERPRINT || 'finger-print-token',
+)
 
-console.log({ ipInfoToken, clientId, lokiHost, excludeOptions })
+console.log({
+  ipInfoToken,
+  clientId,
+  lokiHost,
+  excludeOptions,
+  fingerprintHash: sessionHash,
+})
 
 module.exports = {
   output: {
@@ -30,7 +39,8 @@ module.exports = {
       IPINFO_TOKEN: ipInfoToken,
       CLIENT_ID: clientId,
       LOKI_HOST: lokiHost,
-      OPTIONS: `"${excludeOptions}"`,
+      OPTIONS: `'${excludeOptions}'`,
+      FINGERPRINT: sessionHash,
     }),
   ],
   resolve: {

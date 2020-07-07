@@ -18,6 +18,9 @@ declare global {
   // supported by Cloudflare workers.
   let LOKI_HOST: string
 
+  // Base key used for calculating the session fingerprint
+  let FINGERPRINT: string
+
   // OPTIONS is fetched from an environment variable set in the worker configuration
   let OPTIONS: any
 }
