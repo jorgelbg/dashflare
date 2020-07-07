@@ -158,8 +158,6 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
         delete ip.ip
       }
 
-      ip.lat = lat.toString()
-      ip.lon = lon.toString()
       ip.geohash = geohash
       ip.country_name = `${getName(ip.country)}`
 
