@@ -45,12 +45,14 @@ const parser = new UAParser()
 // flushQueue pushes the existing queue of event's metadata into the backend
 async function flushQueue() {
   let arr: string[] = [`host="${currentHost}"`]
+  let arrLog: string[] = []
   for (let k in batchedEvents[0]) {
     // Avoid putting the url & referer links in the label set
     if (SKIP_LABELS.has(k)) continue
     let v = batchedEvents[0][k]
     if (v != undefined) {
       arr.push(`${k}="${v}"`)
+      arrLog.push(`${k}=${v}`)
     }
   }
 
@@ -61,6 +63,14 @@ async function flushQueue() {
     sessionKey,
     `${batchedEvents[0]['user_agent']}${batchedEvents[0]['ip']}${batchedEvents[0]['domain']}`,
   )
+
+  let line = `[${level}] method=${batchedEvents[0]['method']} ${
+    batchedEvents[0]['url']
+  } referer=${batchedEvents[0]['referer']} user_agent=${
+    batchedEvents[0]['user_agent']
+  } hostname=${
+    batchedEvents[0]['hostname']
+  } session_id=${session} ${arrLog.join(' ')}`
 
   if (status > 300) {
     level = 'WARN'
@@ -77,7 +87,7 @@ async function flushQueue() {
         entries: [
           {
             ts: new Date().toISOString(),
-            line: `[${level}] ${batchedEvents[0]['method']} ${batchedEvents[0]['url']} referer=${batchedEvents[0]['referer']} user_agent=${batchedEvents[0]['user_agent']} hostname=${batchedEvents[0]['hostname']} session_id=${session}`,
+            line: line,
           },
         ],
       },
@@ -190,11 +200,6 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
 
     labels = { ...labels, ...{ type, network, client } }
   }
-
-  // userAgent =
-  //   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.81 Safari/537.36'
-  // const userAgent =
-  //   'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25 (compatible; Googlebot-Mobile/2.1; +http://www.google.com/bot.html)'
 
   batchedEvents.push(labels)
   event.waitUntil(flushQueue())
