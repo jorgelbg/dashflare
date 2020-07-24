@@ -56,7 +56,7 @@ async function flushQueue() {
     }
   }
 
-  let level = 'INFO'
+  let level = 'info'
   let labels = `{${arr.join(',')}}`
   let status = parseInt(batchedEvents[0]['status'])
   let session = hash_hex(
@@ -64,7 +64,7 @@ async function flushQueue() {
     `${batchedEvents[0]['user_agent']}${batchedEvents[0]['ip']}${batchedEvents[0]['domain']}`,
   )
 
-  let line = `[${level}] method=${batchedEvents[0]['method']} ${
+  let line = `level=${level} method=${batchedEvents[0]['method']} ${
     batchedEvents[0]['url']
   } referer=${batchedEvents[0]['referer']} user_agent=${
     batchedEvents[0]['user_agent']
@@ -73,11 +73,11 @@ async function flushQueue() {
   } session_id=${session} ${arrLog.join(' ')}`
 
   if (status > 300) {
-    level = 'WARN'
+    level = 'warn'
   }
 
   if (status > 400) {
-    level = 'ERROR'
+    level = 'error'
   }
 
   let payload = {
