@@ -1,0 +1,8 @@
+export IPINFO=sample
+export CLIENT_ID=fake
+export LOKI_HOST=loki.jorgelbg.me
+export CF_ACCOUNT_ID=sample
+export CF_ZONE_ID=sample
+export CF_API_TOKEN=token
+export FINGERPRINT=sample
+export DOMAIN=example.com

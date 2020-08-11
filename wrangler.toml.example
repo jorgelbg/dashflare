@@ -1,9 +1,0 @@
-name = "loki-log-shipper"
-type = "webpack"
-workers_dev = true
-route = ""
-webpack_config = "webpack.config.js"
-vars = { OPTIONS = '{"css":true,"images":true,"js":true,"ip":true}', LOKI_HOST="loki.jorgelbg.me", CLIENT_ID="asd", IPINFO_TOKEN="asd", FINGERPRINT_KEY="asd" }
-
-[env.dev]
-webpack_config = "webpack.dev.config.js"

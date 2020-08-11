@@ -1,0 +1,14 @@
+name = "loki-log-shipper"
+type = "webpack"
+workers_dev = true
+route = ""
+webpack_config = "webpack.config.js"
+vars = { OPTIONS = '{"css":true,"images":true,"js":true,"ip":true}', LOKI_HOST="$LOKI_HOST", CLIENT_ID="$CLIENT_ID", IPINFO_TOKEN="$IPINFO", FINGERPRINT_KEY="$FINGERPRINT" }
+
+[routes]
+"*.$DOMAIN/*" = "dashflare" # Should match script variable most of the times
+"sub1.$DOMAIN/*" = "" # Don't route this to any worker
+"sub2.$DOMAIN/*" = "dashflare" # Another subdomain
+
+[env.dev]
+webpack_config = "webpack.dev.config.js"
