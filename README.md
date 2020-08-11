@@ -1,37 +1,144 @@
-# ʕ •́؈•̀) `workers-typescript-template`
+# dashflare
 
-A batteries included template for kick starting a TypeScript Cloudflare worker project.
+Dashflare is a privacy first analytics solution for monitoring your websites. It can be self hosted
+on a practically any hosting solution and it should scale with your needs. Data collection is handled
+by a Cloudflare Edge Worker running the code included in this repository.
 
-## 🔋 Getting Started
+Two additional components are required for having the full suite running:
+* Grafana (handles the data visualization)
+* Grafana Loki (handles the data persistence)
 
-This template is meant to be used with [Wrangler](https://github.com/cloudflare/wrangler). If you are not already familiar with the tool, we recommend that you install the tool and configure it to work with your [Cloudflare account](https://dash.cloudflare.com). Documentation can be found [here](https://developers.cloudflare.com/workers/tooling/wrangler/).
+The default provided dashboard looks like:
 
-To generate using Wrangler, run this command:
+<p align="center">
+    <img class="center" src="http://screen.jorgelbg.me/jorgelbg-dropshare/w6nAqMZzsPVz57ab.png" alt="Screenshot of the Grafana dashboard"/>
+</p>
 
-```bash
-wrangler generate my-ts-project https://github.com/cloudflare/workers-typescript-template
+
+## 🎮 Installation / Getting started
+
+A minimal production-like environment is provided and can be used through
+[docker-compose](https://docs.docker.com/compose/):
+
+```
+docker-compose up
 ```
 
-### 👩 💻 Developing
+Cloudflare Edge Workers have certain limitations that prohibit any connection between the edge worker
+and any outside resource that cannot be reached through the ports `80` or `443`. By default Loki is
+listening on port `3100`, you can either change this or run Loki behind a transparent proxy. Grafana is will be listening in the default port (`3000`).
 
-[`src/index.js`](./src/index.ts) calls the request handler in [`src/handler.ts`](./src/handler.ts), and will return the [request method](https://developer.mozilla.org/en-US/docs/Web/API/Request/method) for the given request.
+Another security practice of Cloudflare Edge Workers is that requests from the edge worker can only be made
+against endpoints that are associated with a domain. This means that if you try to set the
+`LOKI_HOST` environment variable to an IP address, the edge worker will not be able send any data.
 
-### 🧪 Testing
+> It is still possible to run loki locally, we need to expose the loki instance to the Internet directly in
+> domain/subdomain. Another posibility (especially useful for development) is to use a service like
+> [ngrok](https://ngrok.com/) to forward the traffic.
 
-This template comes with mocha tests which simply test that the request handler can handle each request method. `npm test` will run your tests.
+## 🤠 wrangler
 
-### ✏️ Formatting
+In order to deploy the edge worker a workable node/npm environment is needed. After installing
+node/npm on your development environment, we need to install
+[wrangler](https://github.com/cloudflare/wrangler) which is the CLI tool that cloudflare offers to
+interact with the edge workers platform.
 
-This template uses [`prettier`](https://prettier.io/) to format the project. To invoke, run `npm run format`.
+```sh
+❯ npm install -g @cloudflare/wrangler
+```
 
-### 👀 Previewing and Publishing
+`wrangler` CLI tool needs access to your Cloudflare account. This is normally achieved by running:
 
-For information on how to preview and publish your worker, please see the [Wrangler docs](https://developers.cloudflare.com/workers/tooling/wrangler/commands/#publish).
+```sh
+❯ wrangler config
+```
 
-## 🤢 Issues
+Or you can directly go to https://dash.cloudflare.com/profile/api-tokens, and create a new token
+using the "Edit Cloudflare Workers" template. You can also expose the token via the `CF_API_TOKEN`
+environment variable.
 
-If you run into issues with this specific project, please feel free to file an issue [here](https://github.com/cloudflare/workers-typescript-template/issues). If the problem is with Wrangler, please file an issue [here](https://github.com/cloudflare/wrangler/issues).
+There are two values needed for wrangler to work: `CF_ACCOUNT_ID` and `CF_ZONE_ID`. `CF_ACCOUNT_ID` is
+your Cloudflare's Accound ID and you can get it (along with the `CF_ZONE_ID`) from your Cloudflare
+dashboard: dash.cloudflare.com.
 
-## ⚠️ Caveats
+You can use the `.envrc.example` file as an example of the variables that should be set. We recommend
+copying the `.envrc.example` file into `.envrc` and loading the configuration into your shell
+environment after editing the file:
 
-The `service-worker-mock` used by the tests is not a perfect representation of the Cloudflare Workers runtime. It is a general approximation. We recommend that you test end to end with `wrangler dev` in addition to a [staging environment](https://developers.cloudflare.com/workers/tooling/wrangler/configuration/environments/) to test things before deploying.
+```sh
+❯ cp .envrc.example .envrc
+# edit `.envrc` to adjust the values
+❯ source .envrc
+```
+
+### Environment variables
+
+This is a list of the environment variables that are needed for the Dashflare edge worker to generate
+the events:
+
+* `IPINFO`: ipinfo.io is used to capture the geolocation data from the website visitors. You should
+  be able to register at ipinfo.io and get an access token. ipinfo.io Allows up to 50,000 requests
+  per month to their API which should be enough to get you started. A paid subscription will increase
+  the max number of API calls allowed.
+* `CLIENT_ID`: If you're self hosting Dashflare, `CLIENT_ID` can be omitted, or be set to any value.
+  By default it is set to `fake` in [`.envrc.example`](./.envrc.example).
+* `LOKI_HOST`: URL where the Loki instance is accessible, it cannot be an IP address nor a domain
+  containing a custom port. A subdomain will work just fine (i.e loki.myawesomedomain.com)
+* `FINGERPRINT`: Its used as the key for the session id hash calculation. A random key can be
+  generated using:
+
+  ```sh
+  ❯ openssl rand -base64 32  | md5
+  ```
+* `DOMAIN`: URL of your "primary domain". The edge worker will be deployed into a custom domain
+  (within the `.workers.dev` if you're using the free tier). This variable is used to generate
+  automatic [routes](https://developers.cloudflare.com/workers/about/routes/). This can be configured
+  through the Cloudflare's Dashboard as well.
+
+## 🗺 Routes
+
+When the edge worker is deployed it will be running in a custom domain (`.workers.dev` if you're
+using the free tier). We need to "forward" the requests from the main domain to the edge worker
+domain. Cloudflare handles this via routes
+[routes](https://developers.cloudflare.com/workers/about/routes/). When using the `make wrangler`
+command a default set of routes will be generated using the `DOMAIN` environment variable. This
+includes an example on how to "exclude" a subdomain from the analytics.
+
+Since the forwarding will be done by Cloudflare there is no change required to the website on your
+original domain. Not even a new `script` tag is needed.
+
+## 🚀 Publishing the edge worker
+
+After `wrangler` is installed, and the environment variables are set, we can deploy our edge worker.
+Before we need to generate a valid `wrangler.toml` file. We provide a handy make target to do this:
+
+```sh
+❯ make wrangler
+```
+
+> The `make wrangler` command depends on [envsubst](https://linux.die.net/man/1/envsubst).
+
+This command will take the [wrangler.toml.template](./wrangler.toml.template) file as a template a
+generate a valid wrangler configuration file (`wrangler.toml`).
+
+> You can inspect/edit the `wrangler.toml` file. Especially the `routes` section might be of interest
+> to you.
+
+Finally we can publish/deploy our edge worker:
+
+```sh
+❯ wrangler publish
+```
+
+This command will build and publish the worker to Cloudflare's edge network.
+
+<!-- ## 👨🏻‍💻 Developing -->
+
+## 🤚🏻 Contributing
+
+If you'd like to contribute, please fork the repository and use a feature
+branch. Pull requests are warmly welcome.
+
+## 🚀 Links
+
+- Project homepage/Demo: https://jorgelbg.me/dashflare
