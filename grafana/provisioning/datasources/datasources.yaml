@@ -1,0 +1,15 @@
+apiVersion: 1
+datasources:
+- orgId: 1
+  version: 1
+  name: Loki
+  type: loki
+  access: proxy
+  url: http://loki:3100
+
+- orgId: 1
+  version: 1
+  name: PromLoki
+  type: prometheus
+  access: proxy
+  url: http://loki:3100/loki
