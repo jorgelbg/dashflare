@@ -14,7 +14,6 @@ The default provided dashboard looks like:
     <img class="center" src="http://screen.jorgelbg.me/jorgelbg-dropshare/w6nAqMZzsPVz57ab.png" alt="Screenshot of the Grafana dashboard"/>
 </p>
 
-
 ## 🎮 Installation / Getting started
 
 A minimal production-like environment is provided and can be used through
@@ -23,6 +22,15 @@ A minimal production-like environment is provided and can be used through
 ```
 docker-compose up
 ```
+
+### 🔑 Grafana authentication
+
+Grafana default user and password are:
+
+* user: admin
+* password: admin
+
+> **You will be asked to change it after the first successful login.**
 
 Cloudflare Edge Workers have certain limitations that prohibit any connection between the edge worker
 and any outside resource that cannot be reached through the ports `80` or `443`. By default Loki is
