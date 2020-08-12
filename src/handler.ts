@@ -68,8 +68,6 @@ async function flushQueue() {
     batchedEvents[0]['url']
   } referer=${batchedEvents[0]['referer']} user_agent=${
     batchedEvents[0]['user_agent']
-  } hostname=${
-    batchedEvents[0]['hostname']
   } session_id=${session} ${arrLog.join(' ')}`
 
   if (status > 300) {
