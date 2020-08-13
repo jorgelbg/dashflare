@@ -1,7 +1,7 @@
 import Geohash from 'latlon-geohash'
 
 const limitErrorMessage: string =
-  'You have exceeded 1,000 requests a day. Visit https://ipinfo.io/account to see your API limits.'
+  'You have exceeded 50,000 requests per month. Visit https://ipinfo.io/account to see your API limits.'
 const MAX_AGE = 86400
 
 export async function ipInfo(ip: string): Promise<Hash<string>> {
