@@ -84,22 +84,22 @@ environment after editing the file:
 This is a list of the environment variables that are needed for the Dashflare edge worker to generate
 the events:
 
-* `IPINFO`: ipinfo.io is used to capture the geolocation data from the website visitors. You should
-  be able to register at ipinfo.io and get an access token. ipinfo.io Allows up to 50,000 requests
-  per month to their API which should be enough to get you started. A paid subscription will increase
+* `IPINFO`: [ipinfo.io] is used to capture the geolocation data from the website visitors. You should
+  be able to register at [ipinfo.io] and get an access token. The [ipinfo.io] free tier allows up to 50,000 requests
+  per month to their API, which should be enough to get you started. A paid subscription will increase
   the max number of API calls allowed.
 * `CLIENT_ID`: If you're self hosting Dashflare, `CLIENT_ID` can be omitted, or be set to any value.
   By default it is set to `fake` in [`.envrc.example`](./.envrc.example).
-* `LOKI_HOST`: URL where the Loki instance is accessible, it cannot be an IP address nor a domain
-  containing a custom port. A subdomain will work just fine (i.e loki.myawesomedomain.com)
+* `LOKI_HOST`: URL where the Loki instance is accessible, it cannot be an IP address (`1.2.3.4`) nor a domain
+  containing a custom port (`loki.example.com:31001`). A subdomain will work just fine (i.e loki.example.com)
 * `FINGERPRINT`: Its used as the key for the session id hash calculation. A random key can be
   generated using:
 
   ```sh
   ❯ openssl rand -base64 32  | md5
   ```
-* `DOMAIN`: URL of your "primary domain". The edge worker will be deployed into a custom domain
-  (within the `.workers.dev` if you're using the free tier). This variable is used to generate
+* `DOMAIN`: URL of your "primary domain". The edge worker will be deployed into a custom subdomain
+  (within `.workers.dev` if you're using the free tier). This variable is used to generate
   automatic [routes](https://developers.cloudflare.com/workers/about/routes/). This can be configured
   through the Cloudflare's Dashboard as well.
 
@@ -115,10 +115,10 @@ includes an example on how to "exclude" a subdomain from the analytics.
 Since the forwarding will be done by Cloudflare there is no change required to the website on your
 original domain. Not even a new `script` tag is needed.
 
-## 🚀 Publishing the edge worker
+## 🔥 Publishing the edge worker
 
 After `wrangler` is installed, and the environment variables are set, we can deploy our edge worker.
-Before we need to generate a valid `wrangler.toml` file. We provide a handy make target to do this:
+Before we need to generate a valid `wrangler.toml` file. A handy make target is provided to do this:
 
 ```sh
 ❯ make wrangler
@@ -149,4 +149,6 @@ branch. Pull requests are warmly welcome.
 
 ## 🚀 Links
 
-- Project homepage/Demo: https://jorgelbg.me/dashflare
+- Project Homepage/Demo/Waiting List: https://jorgelbg.me/dashflare
+
+[ipinfo.io]: https://jorgelbg.me/
