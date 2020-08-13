@@ -25,7 +25,7 @@ docker-compose up
 
 ### 🔑 Grafana authentication
 
-Grafana default user and password are:
+Grafana will be accessible in `http://localhost:3000/` and the default user and password are:
 
 * user: admin
 * password: admin
