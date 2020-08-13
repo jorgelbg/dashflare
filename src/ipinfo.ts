@@ -5,6 +5,12 @@ const limitErrorMessage: string =
 const MAX_AGE = 86400
 
 export async function ipInfo(ip: string): Promise<Hash<string>> {
+  // If the IPINFO_TOKEN variable is empty we asssume that the geolocation has been disabled by the
+  // user and avoid requesting any info from ipinfo.io
+  if (IPINFO_TOKEN.trim().length === 0) {
+    return {}
+  }
+
   let cache = await caches.open('ips')
 
   const url = `http://ipinfo.io/${ip}/json?token=${IPINFO_TOKEN}`
