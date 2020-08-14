@@ -109,8 +109,7 @@ When the edge worker is deployed it will be running in a custom domain (`.worker
 using the free tier). We need to "forward" the requests from the main domain to the edge worker
 domain. Cloudflare handles this via routes
 [routes](https://developers.cloudflare.com/workers/about/routes/). When using the `make wrangler`
-command a default set of routes will be generated using the `DOMAIN` environment variable. This
-includes an example on how to "exclude" a subdomain from the analytics.
+command a default set of routes will be generated using the `DOMAIN` environment variable.
 
 Since the forwarding will be done by Cloudflare there is no change required to the website on your
 original domain. Not even a new `script` tag is needed.
