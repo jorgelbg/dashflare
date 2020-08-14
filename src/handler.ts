@@ -42,6 +42,25 @@ if (EXCLUDE.ip) {
 
 const parser = new UAParser()
 
+// Translates the status code from the request into a string representation
+// compatible with the log level mapping from Grafana:
+// https://github.com/grafana/grafana/blob/1915d10980a1ac91fef6b3577432b47f7c744892/packages/grafana-data/src/types/logs.ts#L9-L27
+function levelFromStatus(status: number): string {
+  if (status > 400) {
+    return 'error'
+  }
+
+  if (status > 300) {
+    return 'warn'
+  }
+
+  if (status > 200) {
+    return 'info'
+  }
+
+  return 'trace'
+}
+
 // flushQueue pushes the existing queue of event's metadata into the backend
 async function flushQueue() {
   let arr: string[] = [`host="${currentHost}"`]
@@ -56,7 +75,6 @@ async function flushQueue() {
     }
   }
 
-  let level = 'info'
   let labels = `{${arr.join(',')}}`
   let status = parseInt(batchedEvents[0]['status'])
   let session = hash_hex(
@@ -64,19 +82,13 @@ async function flushQueue() {
     `${batchedEvents[0]['user_agent']}${batchedEvents[0]['ip']}${batchedEvents[0]['domain']}`,
   )
 
-  let line = `level=${level} method=${batchedEvents[0]['method']} ${
-    batchedEvents[0]['url']
-  } referer=${batchedEvents[0]['referer']} user_agent=${
+  let line = `level=${levelFromStatus(status)} method=${
+    batchedEvents[0]['method']
+  } ${batchedEvents[0]['url']} referer=${
+    batchedEvents[0]['referer']
+  } user_agent=${
     batchedEvents[0]['user_agent']
   } session_id=${session} ${arrLog.join(' ')}`
-
-  if (status > 300) {
-    level = 'warn'
-  }
-
-  if (status > 400) {
-    level = 'error'
-  }
 
   let payload = {
     streams: [
@@ -166,7 +178,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     try {
       const ip = await ipInfo(clientIP)
 
-      let [lat, lon] = ip.loc.split(',').map((n) => parseFloat(n))
+      let [lat, lon] = ip.loc.split(',').map(n => parseFloat(n))
       let geohash = Geohash.encode(lat, lon)
 
       delete ip.loc
@@ -186,9 +198,9 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   }
 
   if (request.headers.get('referer')) {
-    let refData: any = await new Promise((resolve) => {
+    let refData: any = await new Promise(resolve => {
       const ref = request.headers.get('referer')
-      referrer.parse(request.url, ref, function (err: any, info: any) {
+      referrer.parse(request.url, ref, function(err: any, info: any) {
         console.log(JSON.stringify(info['referrer']))
         resolve(info['referrer'])
       })
