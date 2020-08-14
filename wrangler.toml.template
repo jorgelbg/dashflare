@@ -1,4 +1,4 @@
-name = "loki-log-shipper"
+name = "dashflare"
 type = "webpack"
 workers_dev = true
 route = ""
