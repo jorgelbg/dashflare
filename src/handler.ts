@@ -160,7 +160,8 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     browser_version: parser.getBrowser().major,
     os: parser.getOS().name,
     os_version: parser.getOS().version,
-    device_type: parser.getDevice().type,
+    // the ua-parser-js library identify desktop clients as an empty device type
+    device_type: parser.getDevice().type ? parser.getDevice().type : 'desktop',
     country: request.headers.get('cf-ipcountry'),
   }
 
