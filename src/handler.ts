@@ -161,6 +161,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     os: parser.getOS().name,
     os_version: parser.getOS().version,
     device_type: parser.getDevice().type,
+    country: request.headers.get('cf-ipcountry'),
   }
 
   if (DEBUG_HEADERS) {
@@ -178,7 +179,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     try {
       const ip = await ipInfo(clientIP)
 
-      let [lat, lon] = ip.loc.split(',').map(n => parseFloat(n))
+      let [lat, lon] = ip.loc.split(',').map((n) => parseFloat(n))
       let geohash = Geohash.encode(lat, lon)
 
       delete ip.loc
@@ -198,9 +199,9 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
   }
 
   if (request.headers.get('referer')) {
-    let refData: any = await new Promise(resolve => {
+    let refData: any = await new Promise((resolve) => {
       const ref = request.headers.get('referer')
-      referrer.parse(request.url, ref, function(err: any, info: any) {
+      referrer.parse(request.url, ref, function (err: any, info: any) {
         console.log(JSON.stringify(info['referrer']))
         resolve(info['referrer'])
       })

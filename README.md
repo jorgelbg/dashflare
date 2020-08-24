@@ -2,7 +2,7 @@
 
 Dashflare is a privacy first analytics solution for monitoring your websites. It can be self hosted
 on a practically any hosting solution and it should scale with your needs. Data collection is handled
-by a Cloudflare Edge Worker running the code included in this repository.
+by a [Cloudflare Edge](https://workers.cloudflare.com/) Worker running the code included in this repository.
 
 Two additional components are required for having the full suite running:
 * Grafana (handles the data visualization)
@@ -14,13 +14,18 @@ The default provided dashboard looks like:
     <img class="center" src="http://screen.jorgelbg.me/jorgelbg-dropshare/w6nAqMZzsPVz57ab.png" alt="Screenshot of the Grafana dashboard"/>
 </p>
 
+## 🌥Cloudflare
+One requirement to use the current solution is to be already using or be willing
+to use [Cloudflare](https://www.cloudflare.com/) as a CDN in front of your
+website.
+
 ## 🎮 Installation / Getting started
 
 A minimal production-like environment is provided and can be used through
 [docker-compose](https://docs.docker.com/compose/):
 
 ```
-docker-compose up
+❯ docker-compose up
 ```
 
 ### 🔑 Grafana authentication
@@ -34,15 +39,16 @@ Grafana will be accessible in `http://localhost:3000/` and the default user and 
 
 Cloudflare Edge Workers have certain limitations that prohibit any connection between the edge worker
 and any outside resource that cannot be reached through the ports `80` or `443`. By default Loki is
-listening on port `3100`, you can either change this or run Loki behind a transparent proxy. Grafana is will be listening in the default port (`3000`).
+listening on port `3100`, you can either change this or run Loki behind a transparent proxy. Grafana is listening in the default port (`3000`).
 
 Another security practice of Cloudflare Edge Workers is that requests from the edge worker can only be made
 against endpoints that are associated with a domain. This means that if you try to set the
 `LOKI_HOST` environment variable to an IP address, the edge worker will not be able send any data.
 
-> It is still possible to run loki locally, we need to expose the loki instance to the Internet directly in
-> domain/subdomain. Another posibility (especially useful for development) is to use a service like
-> [ngrok](https://ngrok.com/) to forward the traffic.
+> It is still possible to run loki locally, we need to expose the loki instance
+> to the Internet directly in a domain/subdomain. Another posibility (especially
+> useful for development) is to use a service like [ngrok](https://ngrok.com/)
+> to forward the traffic.
 
 ## 🤠 wrangler
 
@@ -84,11 +90,14 @@ environment after editing the file:
 This is a list of the environment variables that are needed for the Dashflare edge worker to generate
 the events:
 
-* `IPINFO`: [ipinfo.io] is used to capture the geolocation data from the website visitors. You should
-  be able to register at [ipinfo.io] and get an access token. The [ipinfo.io] free tier allows up to 50,000 requests
-  per month to their API, which should be enough to get you started. A paid subscription will increase
-  the max number of API calls allowed.
-* `CLIENT_ID`: If you're self hosting Dashflare, `CLIENT_ID` can be omitted, or be set to any value.
+We extract the country name from your visitor's requests. We also provide additional geolocation capabilities via the
+integration with the [ipinfo.io] API.
+
+* `IPINFO`: (optional) [ipinfo.io] is used to capture additionl geolocation data from the website visitors. You should be able to
+  register at [ipinfo.io] and get an access token. The [ipinfo.io] free tier allows up to 50,000 requests per month to
+  their API, which should be enough to get you started. A paid subscription will increase the max number of API calls
+  allowed.
+* `CLIENT_ID`: If you're self hosting Dashflare, `CLIENT_ID` can be omitted, or set to any value.
   By default it is set to `fake` in [`.envrc.example`](./.envrc.example).
 * `LOKI_HOST`: URL where the Loki instance is accessible, it cannot be an IP address (`1.2.3.4`) nor a domain
   containing a custom port (`loki.example.com:31001`). A subdomain will work just fine (i.e loki.example.com)
