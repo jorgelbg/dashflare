@@ -34,7 +34,15 @@ let batchedEvents: Array<Hash<any>> = []
 let currentHost: string | null = ''
 let ipInfoQuotaReached = false
 
-const SKIP_LABELS = new Set(['url', 'referer', 'user_agent', 'hostname', 'ip'])
+const SKIP_LABELS = new Set([
+  'url',
+  'referer',
+  'user_agent',
+  'hostname',
+  'ip',
+  'os_version',
+  'browser_version',
+])
 
 if (EXCLUDE.ip) {
   SKIP_LABELS.add('ip')
@@ -65,10 +73,11 @@ function levelFromStatus(status: number): string {
 async function flushQueue() {
   let arr: string[] = [`host="${currentHost}"`]
   let arrLog: string[] = []
-  for (let k in batchedEvents[0]) {
+  let event = batchedEvents[0]
+  for (let k in event) {
     // Avoid putting the url & referer links in the label set
     if (SKIP_LABELS.has(k)) continue
-    let v = batchedEvents[0][k]
+    let v = event[k]
     if (v != undefined) {
       arr.push(`${k}="${v}"`)
       arrLog.push(`${k}=${v}`)
@@ -76,19 +85,19 @@ async function flushQueue() {
   }
 
   let labels = `{${arr.join(',')}}`
-  let status = parseInt(batchedEvents[0]['status'])
+  let status = parseInt(event['status'])
   let session = hash_hex(
     sessionKey,
-    `${batchedEvents[0]['user_agent']}${batchedEvents[0]['ip']}${batchedEvents[0]['domain']}`,
+    `${event['user_agent']}${event['ip']}${event['domain']}`,
   )
 
-  let line = `level=${levelFromStatus(status)} method=${
-    batchedEvents[0]['method']
-  } ${batchedEvents[0]['url']} referer=${
-    batchedEvents[0]['referer']
-  } user_agent=${
-    batchedEvents[0]['user_agent']
-  } session_id=${session} ${arrLog.join(' ')}`
+  let line = `level=${levelFromStatus(status)} method=${event['method']} ${
+    event['url']
+  } referer=${event['referer']} user_agent=${
+    event['user_agent']
+  } session_id=${session} os_version=${event['os_version']} browser_version=${
+    event['browser_version']
+  } ${arrLog.join(' ')}`
 
   let payload = {
     streams: [
@@ -187,6 +196,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
       delete ip.timezone
       delete ip.postal
       delete ip.org
+      delete ip.region
 
       ip.geohash = geohash
       ip.country_name = `${getName(ip.country)}`
