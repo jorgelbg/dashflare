@@ -1,6 +1,4 @@
-import Geohash from 'latlon-geohash'
-
-import { toMetadata } from './headers'
+import { toLabels } from './headers'
 import { ipInfo } from './ipinfo'
 import { referrer } from 'inbound'
 import { URL } from '@cliqz/url-parser'
@@ -8,6 +6,7 @@ import { getName } from 'country-list'
 import { UAParser } from 'ua-parser-js'
 import { hash_hex, string_to_u8 } from 'siphash'
 import { parse } from './referer'
+import { encode } from 'ngeohash'
 
 let sessionKey = string_to_u8(FINGERPRINT)
 
@@ -178,8 +177,8 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     // This might need to increase the max limit of labels on the Loki side
     labels = {
       ...labels,
-      ...toMetadata(request.headers, 'req'),
-      ...toMetadata(response.headers, 'res'),
+      ...toLabels(request.headers, 'req'),
+      ...toLabels(response.headers, 'res'),
     }
   }
 
@@ -190,7 +189,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
       const ip = await ipInfo(clientIP)
 
       let [lat, lon] = ip.loc.split(',').map((n) => parseFloat(n))
-      let geohash = Geohash.encode(lat, lon)
+      let geohash = encode(lat, lon)
 
       delete ip.loc
       delete ip.timezone
