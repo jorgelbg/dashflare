@@ -1,7 +1,7 @@
 import Geohash from 'latlon-geohash'
 
 const limitErrorMessage: string =
-  'You have exceeded 50,000 requests per month. Visit https://ipinfo.io/account to see your API limits.'
+  'You have exceeded the number of requests per month. Visit https://ipinfo.io/account to see your API limits.'
 const MAX_AGE = 86400
 
 export async function ipInfo(ip: string): Promise<Hash<string>> {
@@ -26,9 +26,14 @@ export async function ipInfo(ip: string): Promise<Hash<string>> {
   }
 
   const res = await fetch(url)
+  // ince in this case we can predict the size of the payload (which it is not large)
+  // we're going for the pragmatic solution of reading the entire body both in production
+  // and testing.
+  // see https://github.com/zackargyle/service-workers/issues/135
+  let str = await res.text()
 
   if (res.status == 200) {
-    let cachedRes = new Response(res.body, res)
+    let cachedRes = new Response(str, res)
     cachedRes.headers.set('Cache-Control', `max-age=${MAX_AGE}`)
     cache.put(key, cachedRes.clone())
 
