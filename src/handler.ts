@@ -5,7 +5,7 @@ import { URL } from '@cliqz/url-parser'
 import { getName } from 'country-list'
 import { UAParser } from 'ua-parser-js'
 import { hash_hex, string_to_u8 } from 'siphash'
-import { parse } from './referer'
+// import { parse } from './referer'
 import { encode } from 'ngeohash'
 
 let sessionKey = string_to_u8(FINGERPRINT)
@@ -121,7 +121,7 @@ async function flushQueue() {
     },
   })
 
-  console.debug(res.status)
+  // console.debug(res.status)
   batchedEvents = []
 }
 
@@ -133,7 +133,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
 
   // fetch the original request
   console.log(`Fetching origin ${request.url}`)
-  const response = await fetch(request)
+  const response = await fetch(request.url, request)
 
   if (EXCLUDE.js && JAVASCRIPT_REGEX.test(request.url)) {
     return response

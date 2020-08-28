@@ -27,15 +27,15 @@ declare global {
 var DEFAULT_OPTIONS = {
   IPINFO_TOKEN: 'test-token',
   CLIENT_ID: 'client-id',
-  LOKI_HOST: 'http://localhost:3100/',
+  LOKI_HOST: 'localhost',
   FINGERPRINT: 'some-uuid',
-  OPTIONS: {
+  OPTIONS: JSON.stringify({
     css: false,
     images: false,
     js: false,
     ip: false,
-  },
+  }),
 }
 
-Object.assign(global, DEFAULT_OPTIONS)
 Object.assign(global, makeServiceWorkerEnv())
+Object.assign(global, DEFAULT_OPTIONS)

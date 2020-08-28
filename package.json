@@ -8,7 +8,7 @@
     "dev": "NODE_ENV=development npm run build",
     "format": "prettier --write '**/*.{ts,js,css,json,md}'",
     "test:clean": "rimraf ./transpiled/src ./transpiled/test",
-    "test": "npm run test:clean && npm run transpile && mocha --require source-map-support/register --recursive --require esm transpiled/test",
+    "test": "npm run test:clean && npm run transpile && mocha --require source-map-support/register --recursive --require transpiled/test/test/_setup.js transpiled/test",
     "transpile": "tsc --project ./test"
   },
   "author": "Jorge Luis Betancourt Gonzalez <github@jorgelbg.me>",
@@ -38,6 +38,7 @@
   "dependencies": {
     "@cliqz/url-parser": "^1.1.3",
     "@types/country-list": "^2.1.0",
+    "@types/fetch-mock": "^7.3.2",
     "@types/js-yaml": "^3.12.5",
     "@types/latlon-geohash": "^2.0.0",
     "@types/ngeohash": "^0.6.2",
