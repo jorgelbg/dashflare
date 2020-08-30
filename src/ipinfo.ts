@@ -22,7 +22,7 @@ export async function ipInfo(ip: string): Promise<Hash<string>> {
   let cachedResponse = await cache.match(key)
 
   if (cachedResponse) {
-    return cachedResponse.json()
+    return cachedResponse.clone().json()
   }
 
   const res = await fetch(url)
@@ -30,7 +30,8 @@ export async function ipInfo(ip: string): Promise<Hash<string>> {
   // we're going for the pragmatic solution of reading the entire body both in production
   // and testing.
   // see https://github.com/zackargyle/service-workers/issues/135
-  let str = await res.text()
+
+  let str = await res.clone().text()
 
   if (res.status == 200) {
     let cachedRes = new Response(str, res)
