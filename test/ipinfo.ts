@@ -17,6 +17,9 @@ describe('enabled geolocation', async () => {
     timezone: 'America/Los_Angeles',
   })
 
+  // mock a request to the ipinfo.io API that returns a 429 Too Many Requests
+  fetchMock.mock(`http://ipinfo.io/203.0.113.0/json?token=test-token`, 429)
+
   it('fetch the ip information', async () => {
     let res = await ipInfo('17.110.220.180')
     expect(res).to.deep.include({
@@ -55,8 +58,6 @@ describe('enabled geolocation', async () => {
 describe('disabled geolocation', async () => {
   after(() => fetchMock.restore())
   let oldToken = IPINFO_TOKEN
-  // mocked request that gets a 429 Too Many Requests HTTP status code from the ipinfo.io API
-  fetchMock.mock(`http://ipinfo.io/203.0.113.0/json?token=test-token`, 429)
 
   before(() => {
     IPINFO_TOKEN = ''
@@ -68,6 +69,8 @@ describe('disabled geolocation', async () => {
 
   it('empty result', async () => {
     let res = await ipInfo('17.110.220.180')
+
     expect(res).to.be.empty
+    expect(fetchMock.calls()).to.be.empty
   })
 })
