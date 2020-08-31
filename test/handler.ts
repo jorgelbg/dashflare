@@ -4,7 +4,7 @@ import { handleRequest } from '../src/handler'
 
 describe('request handler', () => {
   fetchMock.mock(`http://example.com/`, 200)
-  fetchMock.mock(`http://localhost/api/prom/push`, 200)
+  fetchMock.mock(`http://loki:3100/api/prom/push`, 200)
 
   it('sends payload to storage', async () => {
     const headers: HeadersInit = new Headers({
@@ -23,7 +23,19 @@ describe('request handler', () => {
     })
 
     const res = await handleRequest(event)
-    let lokiPOST = fetchMock.calls('http://localhost/api/prom/push')[0][1].body
-    expect(lokiPOST).to.be.include('geohash=\\"9q9hr46y5\\"')
+    let body = fetchMock.calls('http://loki:3100/api/prom/push')[0][1].body
+    expect(body).to.satisfy((string) =>
+      [
+        'os=Mac OS',
+        'device_type=desktop',
+        'country=US',
+        'geohash=9q9hr46y5',
+        'country_name=United States of America',
+        'method=GET',
+        'status=200',
+        'domain=example.com',
+      ].every((bit) => string.includes(bit)),
+    )
+    expect(body).to.not.include('17.110.220.180')
   })
 })

@@ -27,7 +27,7 @@ declare global {
 var DEFAULT_OPTIONS = {
   IPINFO_TOKEN: 'test-token',
   CLIENT_ID: 'client-id',
-  LOKI_HOST: 'localhost',
+  LOKI_HOST: 'loki:3100',
   FINGERPRINT: 'some-uuid',
   OPTIONS: JSON.stringify({
     css: false,
