@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
-import { handleRequest } from '../src/handler'
+import { handleRequest, levelFromStatus } from '../src/handler'
 
 describe('request handler', () => {
   fetchMock.mock(`http://example.com/`, 200)
@@ -37,5 +37,24 @@ describe('request handler', () => {
       ].every((bit) => string.includes(bit)),
     )
     expect(body).to.not.include('17.110.220.180')
+  })
+})
+
+describe('preprocessing', () => {
+  it('translate the status code into a log level', () => {
+    expect(levelFromStatus(100)).to.equal('trace')
+    expect(levelFromStatus(102)).to.equal('trace')
+
+    expect(levelFromStatus(200)).to.equal('info')
+    expect(levelFromStatus(202)).to.equal('info')
+
+    expect(levelFromStatus(300)).to.equal('warn')
+    expect(levelFromStatus(302)).to.equal('warn')
+
+    expect(levelFromStatus(400)).to.equal('error')
+    expect(levelFromStatus(404)).to.equal('error')
+
+    expect(levelFromStatus(500)).to.equal('error')
+    expect(levelFromStatus(522)).to.equal('error')
   })
 })

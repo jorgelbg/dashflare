@@ -53,15 +53,15 @@ const parser = new UAParser()
 // compatible with the log level mapping from Grafana:
 // https://github.com/grafana/grafana/blob/1915d10980a1ac91fef6b3577432b47f7c744892/packages/grafana-data/src/types/logs.ts#L9-L27
 function levelFromStatus(status: number): string {
-  if (status > 400) {
+  if (status >= 400) {
     return 'error'
   }
 
-  if (status > 300) {
+  if (status >= 300) {
     return 'warn'
   }
 
-  if (status > 200) {
+  if (status >= 200) {
     return 'info'
   }
 
@@ -125,7 +125,7 @@ async function flushQueue() {
   batchedEvents = []
 }
 
-export async function handleRequest(event: FetchEvent): Promise<Response> {
+async function handleRequest(event: FetchEvent): Promise<Response> {
   const request = event.request
   if (currentHost == '') {
     currentHost = request.headers.get('host') || request.headers.get('hostname')
@@ -227,3 +227,5 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
 
   return response
 }
+
+export { handleRequest, levelFromStatus }
