@@ -22,10 +22,12 @@ describe('enabled geolocation', async () => {
 
   it('fetch the ip information', async () => {
     let res = await ipInfo('17.110.220.180')
+
     expect(res).to.deep.include({
-      ip: '17.110.220.180',
+      city: 'Cupertino',
       country: 'US',
-      loc: '37.3230,-122.0322',
+      lat: 37.323,
+      lon: -122.0322,
     })
   })
 

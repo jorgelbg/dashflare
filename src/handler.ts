@@ -188,19 +188,10 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     try {
       const ip = await ipInfo(clientIP)
 
-      let [lat, lon] = ip.loc.split(',').map((n) => parseFloat(n))
-      let geohash = encode(lat, lon)
+      let geohash = encode(ip.lat, ip.lon)
+      let country_name = `${getName(ip.country)}`
 
-      delete ip.loc
-      delete ip.timezone
-      delete ip.postal
-      delete ip.org
-      delete ip.region
-
-      ip.geohash = geohash
-      ip.country_name = `${getName(ip.country)}`
-
-      labels = { ...labels, ...ip }
+      labels = { ...labels, ...ip, ...{ country_name, geohash } }
     } catch (error) {
       // We catched 429 Too Many Requests, this means that we reached our current
       // ipinfo quota. Avoid making extra requests.
