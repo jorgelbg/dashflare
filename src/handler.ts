@@ -1,13 +1,12 @@
-import Geohash from 'latlon-geohash'
-
-import { toMetadata } from './headers'
+import { toLabels } from './headers'
 import { ipInfo } from './ipinfo'
 import { referrer } from 'inbound'
 import { URL } from '@cliqz/url-parser'
 import { getName } from 'country-list'
 import { UAParser } from 'ua-parser-js'
 import { hash_hex, string_to_u8 } from 'siphash'
-import { parse } from './referer'
+// import { parse } from './referer'
+import { encode } from 'ngeohash'
 
 let sessionKey = string_to_u8(FINGERPRINT)
 
@@ -34,7 +33,15 @@ let batchedEvents: Array<Hash<any>> = []
 let currentHost: string | null = ''
 let ipInfoQuotaReached = false
 
-const SKIP_LABELS = new Set(['url', 'referer', 'user_agent', 'hostname', 'ip'])
+const SKIP_LABELS = new Set([
+  'url',
+  'referer',
+  'user_agent',
+  'hostname',
+  'ip',
+  'os_version',
+  'browser_version',
+])
 
 if (EXCLUDE.ip) {
   SKIP_LABELS.add('ip')
@@ -46,15 +53,15 @@ const parser = new UAParser()
 // compatible with the log level mapping from Grafana:
 // https://github.com/grafana/grafana/blob/1915d10980a1ac91fef6b3577432b47f7c744892/packages/grafana-data/src/types/logs.ts#L9-L27
 function levelFromStatus(status: number): string {
-  if (status > 400) {
+  if (status >= 400) {
     return 'error'
   }
 
-  if (status > 300) {
+  if (status >= 300) {
     return 'warn'
   }
 
-  if (status > 200) {
+  if (status >= 200) {
     return 'info'
   }
 
@@ -65,10 +72,11 @@ function levelFromStatus(status: number): string {
 async function flushQueue() {
   let arr: string[] = [`host="${currentHost}"`]
   let arrLog: string[] = []
-  for (let k in batchedEvents[0]) {
+  let event = batchedEvents[0]
+  for (let k in event) {
     // Avoid putting the url & referer links in the label set
     if (SKIP_LABELS.has(k)) continue
-    let v = batchedEvents[0][k]
+    let v = event[k]
     if (v != undefined) {
       arr.push(`${k}="${v}"`)
       arrLog.push(`${k}=${v}`)
@@ -76,19 +84,19 @@ async function flushQueue() {
   }
 
   let labels = `{${arr.join(',')}}`
-  let status = parseInt(batchedEvents[0]['status'])
+  let status = parseInt(event['status'])
   let session = hash_hex(
     sessionKey,
-    `${batchedEvents[0]['user_agent']}${batchedEvents[0]['ip']}${batchedEvents[0]['domain']}`,
+    `${event['user_agent']}${event['ip']}${event['domain']}`,
   )
 
-  let line = `level=${levelFromStatus(status)} method=${
-    batchedEvents[0]['method']
-  } ${batchedEvents[0]['url']} referer=${
-    batchedEvents[0]['referer']
-  } user_agent=${
-    batchedEvents[0]['user_agent']
-  } session_id=${session} ${arrLog.join(' ')}`
+  let line = `level=${levelFromStatus(status)} method=${event['method']} ${
+    event['url']
+  } referer=${event['referer']} user_agent=${
+    event['user_agent']
+  } session_id=${session} os_version=${event['os_version']} browser_version=${
+    event['browser_version']
+  } ${arrLog.join(' ')}`
 
   let payload = {
     streams: [
@@ -113,11 +121,11 @@ async function flushQueue() {
     },
   })
 
-  console.debug(res.status)
+  // console.debug(res.status)
   batchedEvents = []
 }
 
-export async function handleRequest(event: FetchEvent): Promise<Response> {
+async function handleRequest(event: FetchEvent): Promise<Response> {
   const request = event.request
   if (currentHost == '') {
     currentHost = request.headers.get('host') || request.headers.get('hostname')
@@ -125,7 +133,7 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
 
   // fetch the original request
   console.log(`Fetching origin ${request.url}`)
-  const response = await fetch(request)
+  const response = await fetch(request.url, request)
 
   if (EXCLUDE.js && JAVASCRIPT_REGEX.test(request.url)) {
     return response
@@ -169,8 +177,8 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     // This might need to increase the max limit of labels on the Loki side
     labels = {
       ...labels,
-      ...toMetadata(request.headers, 'req'),
-      ...toMetadata(response.headers, 'res'),
+      ...toLabels(request.headers, 'req'),
+      ...toLabels(response.headers, 'res'),
     }
   }
 
@@ -180,18 +188,10 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
     try {
       const ip = await ipInfo(clientIP)
 
-      let [lat, lon] = ip.loc.split(',').map((n) => parseFloat(n))
-      let geohash = Geohash.encode(lat, lon)
+      let geohash = encode(ip.lat, ip.lon)
+      let country_name = `${getName(ip.country)}`
 
-      delete ip.loc
-      delete ip.timezone
-      delete ip.postal
-      delete ip.org
-
-      ip.geohash = geohash
-      ip.country_name = `${getName(ip.country)}`
-
-      labels = { ...labels, ...ip }
+      labels = { ...labels, ...ip, ...{ country_name, geohash } }
     } catch (error) {
       // We catched 429 Too Many Requests, this means that we reached our current
       // ipinfo quota. Avoid making extra requests.
@@ -218,3 +218,5 @@ export async function handleRequest(event: FetchEvent): Promise<Response> {
 
   return response
 }
+
+export { handleRequest, levelFromStatus }

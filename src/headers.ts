@@ -15,7 +15,7 @@ const SKIP_HEADERS: string[] = [
   'x-forwarded-proto',
 ]
 
-export function toMetadata(headers: any, prefix: string): Hash<string> {
+export function toLabels(headers: any, prefix: string): Hash<string> {
   let metadata: Hash<string> = {}
 
   Array.from(headers).forEach(([key, value]: any) => {

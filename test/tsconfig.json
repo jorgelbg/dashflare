@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "outDir": "../transpiled",
+    "outDir": "../transpiled/test",
     "target": "esnext",
     "module": "commonjs",
     "sourceMap": true,
+    "esModuleInterop": true,
     "experimentalDecorators": true,
     "lib": ["esnext", "webworker"]
   },
