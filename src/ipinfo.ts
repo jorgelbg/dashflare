@@ -9,16 +9,14 @@ interface IGeoData {
   readonly lon: number
 }
 
-function toGeoData(res: Promise<Hash<string>>): Promise<IGeoData> {
+function toGeoData(res: Promise<Hash<any>>): Promise<IGeoData> {
   return res
     .then((ip) => {
-      let [lat, lon] = ip.loc.split(',').map((n) => parseFloat(n))
-
       return <IGeoData>{
-        city: ip.city,
-        country: ip.country,
-        lat,
-        lon,
+        city: '',
+        country: ip.alpha2,
+        lat: ip.geo.latitude,
+        lon: ip.geo.longitude,
       }
     })
     .catch(() => <IGeoData>{})
@@ -33,7 +31,7 @@ async function ipInfo(ip: string): Promise<IGeoData> {
 
   let cache = await caches.open('ips')
 
-  const url = `http://ipinfo.io/${ip}/json?token=${IPINFO_TOKEN}`
+  const url = `https://api.ipgeolocationapi.com/geolocate/${ip}`
   const key = new Request(url, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
