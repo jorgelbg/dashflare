@@ -5,7 +5,7 @@ import { captureRejectionSymbol } from 'events'
 
 describe('enabled geolocation', async () => {
   after(() => fetchMock.restore())
-  // mock a successfull request to the ipinfo.io API
+  // mock a successfull request to the geolocation API
   fetchMock.mock(`https://api.ipgeolocationapi.com/geolocate/17.110.220.180`, {
     continent: 'North America',
     address_format:
@@ -61,7 +61,7 @@ describe('enabled geolocation', async () => {
     start_of_week: 'sunday',
   })
 
-  // mock a request to the ipinfo.io API that returns a 429 Too Many Requests
+  // mock a request to the API that returns a 429 Too Many Requests
   fetchMock.mock(`https://api.ipgeolocationapi.com/geolocate/203.0.113.0`, 429)
 
   it('fetch the ip information', async () => {
@@ -88,7 +88,7 @@ describe('enabled geolocation', async () => {
           .to.be.an('error')
           .and.have.property(
             'message',
-            'You have exceeded the number of requests per month. Visit https://ipinfo.io/account to see your API limits.',
+            'You have exceeded the number of requests',
           )
       } catch (error) {
         done(error)
@@ -115,6 +115,14 @@ describe('disabled geolocation', async () => {
   it('empty result', async () => {
     let res = await ipInfo('17.110.220.180')
 
+    expect(res).to.be.empty
+    expect(fetchMock.calls()).to.be.empty
+  })
+
+  it('disabled via false', async () => {
+    IPINFO_TOKEN = 'false'
+    let res = await ipInfo('17.110.220.180')
+    IPINFO_TOKEN = ''
     expect(res).to.be.empty
     expect(fetchMock.calls()).to.be.empty
   })

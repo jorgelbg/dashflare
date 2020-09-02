@@ -5,8 +5,9 @@ on a practically any hosting solution and it should scale with your needs. Data 
 by a [Cloudflare Edge](https://workers.cloudflare.com/) Worker running the code included in this repository.
 
 Two additional components are required for having the full suite running:
-* Grafana (handles the data visualization)
-* Grafana Loki (handles the data persistence)
+
+- Grafana (handles the data visualization)
+- Grafana Loki (handles the data persistence)
 
 The default provided dashboard looks like:
 
@@ -14,10 +15,10 @@ The default provided dashboard looks like:
     <img class="center" src="http://screen.jorgelbg.me/jorgelbg-dropshare/w6nAqMZzsPVz57ab.png" alt="Screenshot of the Grafana dashboard"/>
 </p>
 
-## 🌥Cloudflare
-One requirement to use the current solution is to be already using or be willing
-to use [Cloudflare](https://www.cloudflare.com/) as a CDN in front of your
-website.
+## 🌥 Cloudflare
+
+One requirement to use the current solution is to be already using [Cloudflare](https://www.cloudflare.com/) for the
+website that you want to monitor.
 
 ## 🎮 Installation / Getting started
 
@@ -32,8 +33,8 @@ A minimal production-like environment is provided and can be used through
 
 Grafana will be accessible in `http://localhost:3000/` and the default user and password are:
 
-* user: admin
-* password: admin
+- user: admin
+- password: admin
 
 > **You will be asked to change it after the first successful login.**
 
@@ -91,23 +92,21 @@ This is a list of the environment variables that are needed for the Dashflare ed
 the events:
 
 We extract the country name from your visitor's requests. We also provide additional geolocation capabilities via the
-integration with the [ipinfo.io] API.
+integration with the [ipgeolocationapi.com] API.
 
-* `IPINFO`: (optional) [ipinfo.io] is used to capture additionl geolocation data from the website visitors. You should be able to
-  register at [ipinfo.io] and get an access token. The [ipinfo.io] free tier allows up to 50,000 requests per month to
-  their API, which should be enough to get you started. A paid subscription will increase the max number of API calls
-  allowed.
-* `CLIENT_ID`: If you're self hosting Dashflare, `CLIENT_ID` can be omitted, or set to any value.
+- `IPINFO`: (optional) [ipgeolocationapi.com] is used to capture additionl geolocation data from your visitors. It is still possible to opt out of this feature by setting this variable to `false`.
+- `CLIENT_ID`: If you're self hosting Dashflare, `CLIENT_ID` can be omitted, or set to any value.
   By default it is set to `fake` in [`.envrc.example`](./.envrc.example).
-* `LOKI_HOST`: URL where the Loki instance is accessible, it cannot be an IP address (`1.2.3.4`) nor a domain
+- `LOKI_HOST`: URL where the Loki instance is accessible, it cannot be an IP address (`1.2.3.4`) nor a domain
   containing a custom port (`loki.example.com:31001`). A subdomain will work just fine (i.e loki.example.com)
-* `FINGERPRINT`: Its used as the key for the session id hash calculation. A random key can be
+- `FINGERPRINT`: Its used as the key for the session id hash calculation. A random key can be
   generated using:
 
   ```sh
   ❯ openssl rand -base64 32  | md5
   ```
-* `DOMAIN`: URL of your "primary domain". The edge worker will be deployed into a custom subdomain
+
+- `DOMAIN`: URL of your "primary domain". The edge worker will be deployed into a custom subdomain
   (within `.workers.dev` if you're using the free tier). This variable is used to generate
   automatic [routes](https://developers.cloudflare.com/workers/about/routes/). This can be configured
   through the Cloudflare's Dashboard as well.
@@ -159,4 +158,4 @@ branch. Pull requests are warmly welcome.
 
 - Project Homepage/Demo/Waiting List: https://jorgelbg.me/dashflare
 
-[ipinfo.io]: https://jorgelbg.me/
+[ipgeolocationapi.com]: https://ipgeolocationapi.com/

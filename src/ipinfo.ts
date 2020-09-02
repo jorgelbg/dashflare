@@ -1,5 +1,4 @@
-const limitErrorMessage: string =
-  'You have exceeded the number of requests per month. Visit https://ipinfo.io/account to see your API limits.'
+const limitErrorMessage: string = 'You have exceeded the number of requests'
 const MAX_AGE = 86400
 
 interface IGeoData {
@@ -24,8 +23,11 @@ function toGeoData(res: Promise<Hash<any>>): Promise<IGeoData> {
 
 async function ipInfo(ip: string): Promise<IGeoData> {
   // If the IPINFO_TOKEN variable is empty we asssume that the geolocation has been disabled by the
-  // user and avoid requesting any info from ipinfo.io
-  if (IPINFO_TOKEN.trim().length === 0) {
+  // user and avoid requesting any info from the API
+  if (
+    IPINFO_TOKEN.trim().length === 0 ||
+    IPINFO_TOKEN.trim().toLowerCase() == 'false'
+  ) {
     return <IGeoData>{}
   }
 
@@ -61,6 +63,8 @@ async function ipInfo(ip: string): Promise<IGeoData> {
     // Quota limit reached
     // Any other error might be retriable
     throw new Error(limitErrorMessage)
+  } else {
+    throw new Error(`Unexpected response: ${res.text()}`)
   }
 
   return <IGeoData>{}
