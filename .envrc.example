@@ -1,4 +1,4 @@
-export IPINFO=sample
+export IPINFO=true
 export CLIENT_ID=fake
 export LOKI_HOST=loki.jorgelbg.me
 export CF_ACCOUNT_ID=sample
