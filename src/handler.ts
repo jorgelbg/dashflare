@@ -131,9 +131,14 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     currentHost = request.headers.get('host') || request.headers.get('hostname')
   }
 
-  // fetch the original request
-  console.log(`Fetching origin ${request.url}`)
-  const response = await fetch(request.url, request)
+  let response: Response
+  if (request.url.includes('forward=true') == true) {
+    response = new Response('ok', { status: 200 })
+  } else {
+    // fetch the original request
+    console.log(`Fetching origin ${request.url}`)
+    response = await fetch(request.url, request)
+  }
 
   if (EXCLUDE.js && JAVASCRIPT_REGEX.test(request.url)) {
     return response
