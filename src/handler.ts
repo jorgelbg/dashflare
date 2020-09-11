@@ -131,35 +131,42 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     currentHost = request.headers.get('host') || request.headers.get('hostname')
   }
 
+  let url: string = request.url
   let response: Response
-  if (request.url.includes('forward=true') == true) {
+
+  // If the request URL includes forward=true we avoid fetching the upstream URL, instead we reply
+  // directly with an OK status. Additionally we try to get the original URL from the x-original-url
+  // header.
+  // We use a custom header to change as little as possible from the original request.
+  if (request.url.includes('forward=true')) {
     response = new Response('ok', { status: 200 })
+    url = request.headers.get('x-original-url') || request.url
   } else {
     // fetch the original request
     console.log(`Fetching origin ${request.url}`)
     response = await fetch(request.url, request)
   }
 
-  if (EXCLUDE.js && JAVASCRIPT_REGEX.test(request.url)) {
+  if (EXCLUDE.js && JAVASCRIPT_REGEX.test(url)) {
     return response
   }
 
-  if (EXCLUDE.css && CSS_REGEX.test(request.url)) {
+  if (EXCLUDE.css && CSS_REGEX.test(url)) {
     return response
   }
 
-  if (EXCLUDE.images && IMAGE_REGEX.test(request.url)) {
+  if (EXCLUDE.images && IMAGE_REGEX.test(url)) {
     return response
   }
 
-  let parsed = new URL(request.url)
+  let parsed = new URL(url)
   let userAgent = request.headers.get('user-agent')
 
   parser.setUA(`${userAgent}`)
 
   let labels = {
     method: request.method,
-    url: request.url,
+    url: url,
     status: response.status,
     referer: request.headers.get('referer'),
     user_agent: userAgent,
