@@ -8,10 +8,10 @@ describe('request handler', () => {
 
   it('sends payload to storage', async () => {
     const headers: HeadersInit = new Headers({
+      host: 'some.google.host',
       'x-forwarded-proto': 'https',
       'cf-ipcountry': 'US',
       'cf-connecting-ip': '17.110.220.180',
-      host: 'some.google.host',
       'user-agent':
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9',
     })
@@ -41,10 +41,10 @@ describe('request handler', () => {
 
   it('avoid fetching upstream when the URL is forwarded', async () => {
     const headers: HeadersInit = new Headers({
+      host: 'dashflare.test.workers.dev',
       'x-forwarded-proto': 'https',
       'cf-ipcountry': 'US',
       'cf-connecting-ip': '17.110.220.180',
-      host: 'dashflare.test.workers.dev',
       'user-agent':
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9',
       'x-original-url': 'https://example.com',

@@ -131,15 +131,13 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     currentHost = request.headers.get('host') || request.headers.get('hostname')
   }
 
-  let url: string = request.url
   let response: Response
-
+  let url = request.headers.get('x-original-url') || request.url
   // If the request contains a 'x-original-url' header we understand that this request is forwarded
   // to the worker and that therefor the upstream should not be fetched. We use a custom header to
   // change as little as possible from the original request.
   if (request.headers.get('x-original-url') != null) {
     response = new Response('ok', { status: 200 })
-    url = request.headers.get('x-original-url') || request.url
   } else {
     // fetch the original request
     console.log(`Fetching origin ${request.url}`)
