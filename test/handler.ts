@@ -52,7 +52,7 @@ describe('request handler', () => {
     })
 
     const event = new FetchEvent('fetch', {
-      request: new Request('https://dashflare.test.workers.dev?forward=true', {
+      request: new Request('https://dashflare.test.workers.dev', {
         headers,
       }),
     })

@@ -134,11 +134,10 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   let url: string = request.url
   let response: Response
 
-  // If the request URL includes forward=true we avoid fetching the upstream URL, instead we reply
-  // directly with an OK status. Additionally we try to get the original URL from the x-original-url
-  // header.
-  // We use a custom header to change as little as possible from the original request.
-  if (request.url.includes('forward=true')) {
+  // If the request contains a 'x-original-url' header we understand that this request is forwarded
+  // to the worker and that therefor the upstream should not be fetched. We use a custom header to
+  // change as little as possible from the original request.
+  if (request.headers.get('x-original-url') != null) {
     response = new Response('ok', { status: 200 })
     url = request.headers.get('x-original-url') || request.url
   } else {
