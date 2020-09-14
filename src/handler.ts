@@ -132,7 +132,11 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   }
 
   let response: Response
-  if (request.url.includes('forward=true') == true) {
+  let url = request.headers.get('x-original-url') || request.url
+  // If the request contains a 'x-original-url' header we understand that this request is forwarded
+  // to the worker and that therefor the upstream should not be fetched. We use a custom header to
+  // change as little as possible from the original request.
+  if (request.headers.get('x-original-url') != null) {
     response = new Response('ok', { status: 200 })
   } else {
     // fetch the original request
@@ -140,26 +144,26 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     response = await fetch(request.url, request)
   }
 
-  if (EXCLUDE.js && JAVASCRIPT_REGEX.test(request.url)) {
+  if (EXCLUDE.js && JAVASCRIPT_REGEX.test(url)) {
     return response
   }
 
-  if (EXCLUDE.css && CSS_REGEX.test(request.url)) {
+  if (EXCLUDE.css && CSS_REGEX.test(url)) {
     return response
   }
 
-  if (EXCLUDE.images && IMAGE_REGEX.test(request.url)) {
+  if (EXCLUDE.images && IMAGE_REGEX.test(url)) {
     return response
   }
 
-  let parsed = new URL(request.url)
+  let parsed = new URL(url)
   let userAgent = request.headers.get('user-agent')
 
   parser.setUA(`${userAgent}`)
 
   let labels = {
     method: request.method,
-    url: request.url,
+    url: url,
     status: response.status,
     referer: request.headers.get('referer'),
     user_agent: userAgent,
