@@ -8,6 +8,14 @@ import { hash_hex, string_to_u8 } from 'siphash'
 // import { parse } from './referer'
 import { encode } from 'ngeohash'
 
+import honey from 'honeycomb-beeline'
+
+let beeline = honey({
+  writeKey: '7692faaefa35e76a407a8f68127326a4',
+  dataset: 'dashflare',
+  serviceName: 'worker',
+})
+
 let sessionKey = string_to_u8(FINGERPRINT)
 
 // These settings will be provided as environment variables
@@ -69,7 +77,16 @@ function levelFromStatus(status: number): string {
 }
 
 // flushQueue pushes the existing queue of event's metadata into the backend
-async function flushQueue() {
+async function flushQueue(root: any) {
+  let span = beeline.startSpan({
+    queueSize: MAX_QUEUE_EVENTS,
+    lokiHost: LOKI_HOST,
+    name: 'flushQueue',
+  })
+
+  console.log('child')
+  // console.log({ span })
+
   let arr: string[] = [`host="${currentHost}"`]
   let arrLog: string[] = []
   let event = batchedEvents[0]
@@ -121,11 +138,21 @@ async function flushQueue() {
     },
   })
 
-  // console.debug(res.status)
+  beeline.finishSpan(span)
+  beeline.finishSpan(root)
+  beeline.finishTrace(root)
   batchedEvents = []
 }
 
 async function handleRequest(event: FetchEvent): Promise<Response> {
+  let rootSpan = beeline.startTrace({
+    ipinfo: IPINFO_TOKEN.trim() != '',
+    name: 'handler',
+    clientId: CLIENT_ID,
+  })
+
+  console.log({ rootSpan })
+
   const request = event.request
   if (currentHost == '') {
     currentHost = request.headers.get('host') || request.headers.get('hostname')
@@ -140,21 +167,30 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     response = new Response('ok', { status: 200 })
   } else {
     // fetch the original request
-    console.log(`Fetching origin ${request.url}`)
-    response = await fetch(request.url, request)
+    console.log(`Fetching origin ${url}`)
+    response = await beeline.withSpan({ name: 'fetch' }, () => {
+      return fetch(url, request)
+    })
   }
 
   if (EXCLUDE.js && JAVASCRIPT_REGEX.test(url)) {
+    // beeline.customContext.add({ excluded: true })
     return response
   }
 
   if (EXCLUDE.css && CSS_REGEX.test(url)) {
+    // beeline.customContext.add({ excluded: true })
     return response
   }
 
   if (EXCLUDE.images && IMAGE_REGEX.test(url)) {
+    // beeline.customContext.add({ excluded: true })
     return response
   }
+
+  let span = beeline.startSpan({
+    name: 'basicLabels',
+  })
 
   let parsed = new URL(url)
   let userAgent = request.headers.get('user-agent')
@@ -191,17 +227,22 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     }
   }
 
+  beeline.finishSpan(span)
+
   let clientIP = request.headers.get('cf-connecting-ip') || ''
 
   if (ipInfoQuotaReached == false && clientIP.length > 0) {
     try {
-      const ip = await ipInfo(clientIP)
+      const ip = await beeline.withSpan({ name: 'ipInfo' }, () => {
+        return ipInfo(clientIP)
+      })
 
       let geohash = encode(ip.lat, ip.lon)
       let country_name = `${getName(ip.country)}`
 
       labels = { ...labels, ...ip, ...{ country_name, geohash } }
     } catch (error) {
+      // TODO: we may want to implement a backoff approach here and eventually retry
       // We catched 429 Too Many Requests, this means that we reached our current
       // ipinfo quota. Avoid making extra requests.
       ipInfoQuotaReached = true
@@ -211,7 +252,7 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   if (request.headers.get('referer')) {
     let refData: any = await new Promise((resolve) => {
       const ref = request.headers.get('referer')
-      referrer.parse(request.url, ref, function (err: any, info: any) {
+      referrer.parse(url, ref, function (err: any, info: any) {
         console.log(JSON.stringify(info['referrer']))
         resolve(info['referrer'])
       })
@@ -222,8 +263,12 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     labels = { ...labels, ...{ type, network, client } }
   }
 
+  // beeline.withSpan({ name: 'slow-child' }, () => {})
+  // beeline.finishTrace(rootSpan)
+
   batchedEvents.push(labels)
-  event.waitUntil(flushQueue())
+
+  event.waitUntil(flushQueue(rootSpan))
 
   return response
 }
