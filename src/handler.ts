@@ -133,6 +133,11 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
 
   let response: Response
   let url = request.headers.get('x-original-url') || request.url
+  let clientIP =
+    request.headers.get('x-original-ip') ||
+    request.headers.get('cf-connecting-ip') ||
+    ''
+
   // If the request contains a 'x-original-url' header we understand that this request is forwarded
   // to the worker and that therefor the upstream should not be fetched. We use a custom header to
   // change as little as possible from the original request.
@@ -191,8 +196,6 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     }
   }
 
-  let clientIP = request.headers.get('cf-connecting-ip') || ''
-
   if (ipInfoQuotaReached == false && clientIP.length > 0) {
     try {
       const ip = await ipInfo(clientIP)
@@ -212,7 +215,6 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     let refData: any = await new Promise((resolve) => {
       const ref = request.headers.get('referer')
       referrer.parse(request.url, ref, function (err: any, info: any) {
-        console.log(JSON.stringify(info['referrer']))
         resolve(info['referrer'])
       })
     })

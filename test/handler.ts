@@ -72,6 +72,44 @@ describe('request handler', () => {
       ].every((bit) => string.includes(bit)),
     )
   })
+
+  it('uses the x-original-ip header when the URL is forwarded', async () => {
+    const headers: HeadersInit = new Headers({
+      host: 'dashflare.test.workers.dev',
+      'x-forwarded-proto': 'https',
+      'cf-ipcountry': 'US',
+      // 1.1.1.1 is an example IP set by cloudflare when the request is forwarded
+      'cf-connecting-ip': '1.1.1.1',
+      'user-agent':
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9',
+      'x-original-url': 'https://example.com',
+      'x-original-ip': '17.110.220.180',
+      referer: 'https://t.co/gJV9DEbJVy',
+    })
+
+    const event = new FetchEvent('fetch', {
+      request: new Request('https://dashflare.test.workers.dev', {
+        headers,
+      }),
+    })
+
+    const res = await handleRequest(event)
+    expect(await res.text()).to.equal('ok')
+
+    let body = fetchMock.calls('http://loki:3100/api/prom/push')[2][1].body
+
+    expect(body).to.satisfy((string) =>
+      [
+        'status=200',
+        // domain is extracted from the x-original-url header
+        'domain=example.com',
+        // the referer of the original request is detected and parsed
+        'network=twitter',
+        'type=social',
+        'geohash=9yegjbpfr',
+      ].every((bit) => string.includes(bit)),
+    )
+  })
 })
 
 describe('preprocessing', () => {
