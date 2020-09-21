@@ -7,7 +7,6 @@ vars = { OPTIONS = '{"css":true,"images":true,"js":true,"ip":true}', LOKI_HOST="
 
 routes = [
     "$DOMAIN/*",
-    "sub1.$DOMAIN/*",
 ]
 
 [env.dev]
