@@ -16,14 +16,14 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1597329467490,
+  "iteration": 1600738308050,
   "links": [],
   "panels": [
     {
       "circleMaxSize": "15",
       "circleMinSize": "5",
       "colors": [
-        "#E02F44",
+        "#FADE2A",
         "#FFB357",
         "#A352CC"
       ],
@@ -47,8 +47,8 @@
       "hideEmpty": false,
       "hideZero": false,
       "id": 2,
-      "initialZoom": "3",
-      "locationData": "geohash",
+      "initialZoom": "2",
+      "locationData": "countries",
       "mapCenter": "custom",
       "mapCenterLatitude": "30",
       "mapCenterLongitude": "-20",
@@ -65,11 +65,11 @@
       },
       "targets": [
         {
-          "expr": "sum(count_over_time({geohash=~\".+\", url!~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\"}[$__interval])) by (geohash,city)",
-          "format": "table",
+          "expr": "sum(count_over_time({geohash=~\".+\", url!~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\"}[$__interval])) by (country,city)",
+          "format": "time_series",
           "instant": false,
           "interval": "",
-          "legendFormat": "{{ geohash }}",
+          "legendFormat": "{{ country }}",
           "refId": "A"
         }
       ],
@@ -125,10 +125,10 @@
         },
         "textMode": "value"
       },
-      "pluginVersion": "7.2.0-d832bb08pre",
+      "pluginVersion": "7.3.0-23625edcpre",
       "targets": [
         {
-          "expr": "sum(count_over_time({host=~\"$domain\"} !~ \".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__interval]))",
+          "expr": "sum(count_over_time({domain=~\"$domain\"} !~ \".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__interval]))",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -195,10 +195,10 @@
         },
         "textMode": "value"
       },
-      "pluginVersion": "7.2.0-d832bb08pre",
+      "pluginVersion": "7.3.0-23625edcpre",
       "targets": [
         {
-          "expr": "sum(count_over_time({status!~\"(2|3).*\",host=~\"$domain\"}[$__interval]))",
+          "expr": "sum(count_over_time({status!~\"(2|3).*\",domain=~\"$domain\"}[$__interval]))",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -269,7 +269,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "7.2.0-d832bb08pre",
+      "pluginVersion": "7.3.0-23625edcpre",
       "targets": [
         {
           "expr": "sum(count_over_time({status=~\".+\"}[$__interval]))",
@@ -285,6 +285,45 @@
       "type": "gauge"
     },
     {
+      "alert": {
+        "alertRuleTags": {},
+        "conditions": [
+          {
+            "evaluator": {
+              "params": [
+                1
+              ],
+              "type": "lt"
+            },
+            "operator": {
+              "type": "and"
+            },
+            "query": {
+              "params": [
+                "D",
+                "5m",
+                "now"
+              ]
+            },
+            "reducer": {
+              "params": [],
+              "type": "avg"
+            },
+            "type": "query"
+          }
+        ],
+        "executionErrorState": "alerting",
+        "for": "5m",
+        "frequency": "1m",
+        "handler": 1,
+        "name": "Requests alert",
+        "noDataState": "no_data",
+        "notifications": [
+          {
+            "uid": "ws_V0FdGk"
+          }
+        ]
+      },
       "aliasColors": {},
       "bars": true,
       "dashLength": 10,
@@ -321,20 +360,28 @@
       "maxDataPoints": "500",
       "nullPointMode": "null as zero",
       "options": {
-        "alertThreshold": true
+        "alertThreshold": false
       },
       "percentage": false,
-      "pluginVersion": "7.2.0-d832bb08pre",
+      "pluginVersion": "7.3.0-23625edcpre",
       "pointradius": 1,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "alias": "total",
+          "bars": false,
+          "fillGradient": 0,
+          "lines": true,
+          "yaxis": 2
+        }
+      ],
       "spaceLength": 10,
       "stack": true,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by (status) (count_over_time({status=~\"2.*\",host=~\"$domain\", url!~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\"}[$__interval]))",
+          "expr": "sum by (status) (count_over_time({status=~\"2.*\",domain=~\"$domain\", url!~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\"}[$__interval]))",
           "instant": false,
           "interval": "",
           "intervalFactor": 5,
@@ -342,21 +389,36 @@
           "refId": "A"
         },
         {
-          "expr": "sum by (status) (count_over_time({status=~\"4.*\",host=~\"$domain\", url!~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\"}[$__interval]))",
+          "expr": "sum by (status) (count_over_time({status=~\"4.*\",domain=~\"$domain\", url!~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\"}[$__interval]))",
           "interval": "",
           "intervalFactor": 5,
           "legendFormat": "{{ status }}",
           "refId": "B"
         },
         {
-          "expr": "sum by (status) (count_over_time({status=~\"5.*\",host=~\"$domain\", url!~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\"}[$__interval]))",
+          "expr": "sum by (status) (count_over_time({status=~\"5.*\",domain=~\"$domain\", url!~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\"}[$__interval]))",
           "interval": "",
           "intervalFactor": 5,
           "legendFormat": "{{ status }}",
           "refId": "C"
+        },
+        {
+          "expr": "sum (count_over_time({status=~\"2.*\"}[1h]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "total",
+          "refId": "D"
         }
       ],
-      "thresholds": [],
+      "thresholds": [
+        {
+          "colorMode": "critical",
+          "fill": false,
+          "line": false,
+          "op": "lt",
+          "value": 1
+        }
+      ],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
@@ -402,7 +464,8 @@
       "fieldConfig": {
         "defaults": {
           "custom": {
-            "align": null
+            "align": null,
+            "filterable": false
           },
           "mappings": [],
           "thresholds": {
@@ -451,10 +514,10 @@
           }
         ]
       },
-      "pluginVersion": "7.2.0-d832bb08pre",
+      "pluginVersion": "7.3.0-23625edcpre",
       "targets": [
         {
-          "expr": "topk(10, sum(count_over_time({host=~\"$domain\", type=~\".+\"}[$__range])) by (type, network))",
+          "expr": "topk(10, sum(count_over_time({domain=~\"$domain\", type=~\".+\"}[$__range])) by (type, network))",
           "format": "table",
           "instant": true,
           "interval": "1d",
@@ -490,15 +553,43 @@
       "type": "table"
     },
     {
-      "columns": [],
       "datasource": "PromLoki",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Count"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
       },
-      "fontSize": "100%",
       "gridPos": {
         "h": 14,
         "w": 10,
@@ -506,50 +597,16 @@
         "y": 13
       },
       "id": 11,
-      "pageSize": null,
-      "showHeader": true,
-      "sort": {
-        "col": 2,
-        "desc": true
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Count"
+          }
+        ]
       },
-      "styles": [
-        {
-          "alias": "Page",
-          "align": "auto",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "mappingType": 1,
-          "pattern": "path",
-          "preserveFormat": false,
-          "thresholds": [],
-          "type": "string",
-          "unit": "short"
-        },
-        {
-          "alias": "",
-          "align": "auto",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "Time",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short"
-        }
-      ],
+      "pluginVersion": "7.3.0-23625edcpre",
       "targets": [
         {
           "expr": "topk(15, sum(count_over_time({domain=~\"$domain\", path!=\"/\", path!=\"/robots.txt\", path!=\"/index.xml\", status=\"200\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__range])) by (path))",
@@ -564,27 +621,30 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "Top Pages",
-      "transform": "table",
       "transformations": [
         {
           "id": "organize",
           "options": {
-            "excludeByName": {},
+            "excludeByName": {
+              "Time": true
+            },
             "indexByName": {},
             "renameByName": {
-              "Value": "Count"
+              "Value": "Count",
+              "path": "Path"
             }
           }
         }
       ],
-      "type": "table-old"
+      "type": "table"
     },
     {
       "datasource": "PromLoki",
       "fieldConfig": {
         "defaults": {
           "custom": {
-            "align": null
+            "align": null,
+            "filterable": false
           },
           "mappings": [],
           "thresholds": {
@@ -617,8 +677,8 @@
         ]
       },
       "gridPos": {
-        "h": 8,
-        "w": 4,
+        "h": 5,
+        "w": 8,
         "x": 16,
         "y": 13
       },
@@ -632,7 +692,7 @@
           }
         ]
       },
-      "pluginVersion": "7.2.0-d832bb08pre",
+      "pluginVersion": "7.3.0-23625edcpre",
       "targets": [
         {
           "expr": "topk(5, sum(count_over_time({domain=~\"$domain\", status=\"200\", browser=~\".+\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__range])) by (browser))",
@@ -671,7 +731,8 @@
       "fieldConfig": {
         "defaults": {
           "custom": {
-            "align": null
+            "align": null,
+            "filterable": false
           },
           "mappings": [],
           "thresholds": {
@@ -704,10 +765,10 @@
         ]
       },
       "gridPos": {
-        "h": 8,
-        "w": 4,
-        "x": 20,
-        "y": 13
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 18
       },
       "id": 16,
       "options": {
@@ -719,7 +780,7 @@
           }
         ]
       },
-      "pluginVersion": "7.2.0-d832bb08pre",
+      "pluginVersion": "7.3.0-23625edcpre",
       "targets": [
         {
           "expr": "topk(5, sum(count_over_time({domain=~\"$domain\", status=\"200\", os=~\".+\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__range])) by (os))",
@@ -758,7 +819,8 @@
       "fieldConfig": {
         "defaults": {
           "custom": {
-            "align": null
+            "align": null,
+            "filterable": false
           },
           "mappings": [],
           "thresholds": {
@@ -806,10 +868,10 @@
           }
         ]
       },
-      "pluginVersion": "7.2.0-d832bb08pre",
+      "pluginVersion": "7.3.0-23625edcpre",
       "targets": [
         {
-          "expr": "topk(10, sum(count_over_time({host=~\"$domain\", path!=\"/robots.txt\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__range])) by (country_name))",
+          "expr": "topk(10, sum(count_over_time({domain=~\"$domain\", path!=\"/robots.txt\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__range])) by (country_name))",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -842,7 +904,8 @@
       "fieldConfig": {
         "defaults": {
           "custom": {
-            "align": null
+            "align": null,
+            "filterable": false
           },
           "mappings": [],
           "thresholds": {
@@ -896,10 +959,10 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 4,
         "w": 4,
         "x": 16,
-        "y": 21
+        "y": 24
       },
       "id": 17,
       "options": {
@@ -911,7 +974,7 @@
           }
         ]
       },
-      "pluginVersion": "7.2.0-d832bb08pre",
+      "pluginVersion": "7.3.0-23625edcpre",
       "targets": [
         {
           "expr": "topk(5, sum(count_over_time({domain=~\"$domain\", status=\"200\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__range])) by (device_type))",
@@ -944,93 +1007,6 @@
         }
       ],
       "type": "table"
-    },
-    {
-      "datasource": "PromLoki",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": null
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "semi-dark-blue",
-                "value": 50
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
-            },
-            "properties": [
-              {
-                "id": "custom.displayMode",
-                "value": "gradient-gauge"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 11,
-        "x": 0,
-        "y": 27
-      },
-      "id": 14,
-      "options": {
-        "showHeader": false,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Value"
-          }
-        ]
-      },
-      "pluginVersion": "7.2.0-d832bb08pre",
-      "targets": [
-        {
-          "expr": "topk(10, sum(count_over_time({domain=~\"$domain\", path!=\"/\", path!=\"/robots.txt\", status=\"200\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__range])) by (city, country_name))",
-          "format": "table",
-          "instant": true,
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{ city }}, {{ country_name }}",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Top Cities",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "city": false,
-              "country_name": false
-            },
-            "indexByName": {},
-            "renameByName": {
-              "city": "",
-              "country_name": ""
-            }
-          }
-        }
-      ],
-      "type": "table"
     }
   ],
   "refresh": false,
@@ -1043,21 +1019,22 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "tags": [],
-          "text": "All",
+          "text": [
+            "jorgelbg.me"
+          ],
           "value": [
-            "$__all"
+            "jorgelbg.me"
           ]
         },
         "datasource": "Loki",
-        "definition": "label_values(host)",
+        "definition": "label_values(domain)",
         "hide": 0,
         "includeAll": true,
         "label": null,
         "multi": true,
         "name": "domain",
         "options": [],
-        "query": "label_values(host)",
+        "query": "label_values(domain)",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1097,7 +1074,7 @@
     ]
   },
   "timezone": "",
-  "title": "Overview",
+  "title": "jorgelbg.me",
   "uid": "eVzGT0_Wk",
-  "version": 40
+  "version": 50
 }
