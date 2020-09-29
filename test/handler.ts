@@ -69,6 +69,7 @@ describe('request handler', () => {
         // the referer of the original request is detected and parsed
         'network=twitter',
         'type=social',
+        'referer_domain=t.co',
       ].every((bit) => string.includes(bit)),
     )
   })
