@@ -1,6 +1,6 @@
 import { toLabels } from './headers'
 import { ipInfo } from './ipinfo'
-import { referrer } from 'inbound'
+import { referrer, shorten } from 'inbound'
 import { URL } from '@cliqz/url-parser'
 import { getName } from 'country-list'
 import { UAParser } from 'ua-parser-js'
@@ -185,6 +185,10 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     // the ua-parser-js library identify desktop clients as an empty device type
     device_type: parser.getDevice().type ? parser.getDevice().type : 'desktop',
     country: request.headers.get('cf-ipcountry'),
+    type: '',
+    network: '',
+    client: '',
+    referer_domain: '',
   }
 
   if (DEBUG_HEADERS) {
@@ -213,15 +217,18 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
 
   if (request.headers.get('referer')) {
     let refData: any = await new Promise((resolve) => {
-      const ref = request.headers.get('referer')
+      const ref = request.headers.get('referer') || ''
       referrer.parse(request.url, ref, function (err: any, info: any) {
-        resolve(info['referrer'])
+        // The inbound library doesn't shortens all links from a referer URL only some
+        // transformations are applied. We first get only the domain from the URL and then run it
+        // through the shorten.domain function.
+        let domain = shorten.domain(new URL(ref).domain)
+        resolve({ ...info['referrer'], domain })
       })
     })
 
-    const { type, network, client } = refData
-
-    labels = { ...labels, ...{ type, network, client } }
+    const { type, network, client, domain } = refData
+    labels = { ...labels, type, network, client, referer_domain: domain }
   }
 
   batchedEvents.push(labels)
