@@ -13,6 +13,6 @@ pkgs.stdenv.mkDerivation {
 
     shellHook = ''
         export PATH="$PWD/node_modules/.bin/:$PATH"
-        alias run='npm run'
+        alias dev='wrangler dev --env=dev'
     '';
 }
