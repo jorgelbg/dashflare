@@ -26,11 +26,11 @@ describe('request handler', () => {
     let body = fetchMock.calls('http://loki:3100/api/prom/push')[0][1].body
     expect(body).to.satisfy((string) =>
       [
-        'os=Mac OS',
+        'os=\\"Mac OS\\"',
         'device_type=desktop',
         'country=US',
         'geohash=9yegjbpfr',
-        'country_name=United States of America',
+        'country_name=\\"United States of America\\"',
         'method=GET',
         'status=200',
         'domain=example.com',

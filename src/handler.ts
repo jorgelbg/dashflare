@@ -5,6 +5,7 @@ import { URL } from '@cliqz/url-parser'
 import { getName } from 'country-list'
 import { UAParser } from 'ua-parser-js'
 import { hash_hex, string_to_u8 } from 'siphash'
+import logfmt from 'logfmt'
 // import { parse } from './referer'
 import { encode } from 'ngeohash'
 
@@ -70,33 +71,35 @@ function levelFromStatus(status: number): string {
 
 // flushQueue pushes the existing queue of event's metadata into the backend
 async function flushQueue() {
-  let arr: string[] = [`host="${currentHost}"`]
-  let arrLog: string[] = []
   let event = batchedEvents[0]
+  let objLabels:Hash<String> = {}
+  let obj:Hash<String> = {}
+
   for (let k in event) {
     // Avoid putting the url & referer links in the label set
     if (SKIP_LABELS.has(k)) continue
     let v = event[k]
     if (v != undefined) {
-      arr.push(`${k}="${v}"`)
-      arrLog.push(`${k}=${v}`)
+      obj[k] = v
+      objLabels[k] = v
     }
   }
 
-  let labels = `{${arr.join(',')}}`
+  let labels = logfmt.stringify(objLabels)
   let status = parseInt(event['status'])
   let session = hash_hex(
     sessionKey,
     `${event['user_agent']}${event['ip']}${event['domain']}`,
   )
 
-  let line = `level=${levelFromStatus(status)} method=${event['method']} ${
-    event['url']
-  } referer=${event['referer']} user_agent=${
-    event['user_agent']
-  } session_id=${session} os_version=${event['os_version']} browser_version=${
-    event['browser_version']
-  } ${arrLog.join(' ')}`
+  obj['level'] = levelFromStatus(status)
+  obj['method'] = event['method']
+  obj['url'] = event['url']
+  obj['referer'] = event['referer']
+  obj['user_agent'] = event['user_agent']
+  obj['session'] = session
+  obj['os_version'] = event['os_version']
+  obj['browser_version'] = event['browser_version']
 
   let payload = {
     streams: [
@@ -105,7 +108,7 @@ async function flushQueue() {
         entries: [
           {
             ts: new Date().toISOString(),
-            line: line,
+            line: logfmt.stringify(obj),
           },
         ],
       },
