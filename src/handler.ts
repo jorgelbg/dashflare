@@ -72,8 +72,8 @@ function levelFromStatus(status: number): string {
 // flushQueue pushes the existing queue of event's metadata into the backend
 async function flushQueue() {
   let event = batchedEvents[0]
-  let objLabels:Hash<String> = {}
-  let obj:Hash<String> = {}
+  let labels: string[] = []
+  let obj: Hash<String> = {}
 
   for (let k in event) {
     // Avoid putting the url & referer links in the label set
@@ -81,11 +81,10 @@ async function flushQueue() {
     let v = event[k]
     if (v != undefined) {
       obj[k] = v
-      objLabels[k] = v
+      labels.push(`${k}="${v}"`)
     }
   }
 
-  let labels = logfmt.stringify(objLabels)
   let status = parseInt(event['status'])
   let session = hash_hex(
     sessionKey,
@@ -104,7 +103,7 @@ async function flushQueue() {
   let payload = {
     streams: [
       {
-        labels: labels,
+        labels: `{${labels.join(',')}}`,
         entries: [
           {
             ts: new Date().toISOString(),
