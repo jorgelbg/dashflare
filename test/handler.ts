@@ -2,6 +2,16 @@ import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { handleRequest, levelFromStatus } from '../src/handler'
 
+/**
+ * StoragePayload is a test only utility for dynamically accessing any property present in
+ * the JSON payload sent to our storage layer as key (string) to value (any).
+ *
+ * TODO: jorgelbg: perhaps create a dedicated type/class for this
+ */
+interface StoragePayload {
+  [key: string]: any
+}
+
 describe('request handler', () => {
   fetchMock.mock(`http://example.com/`, 200)
   fetchMock.mock(`http://loki:3100/api/prom/push`, 200)
@@ -24,19 +34,23 @@ describe('request handler', () => {
 
     const res = await handleRequest(event)
     let body = fetchMock.calls('http://loki:3100/api/prom/push')[0][1].body
-    expect(body).to.satisfy((string) =>
+
+    var bodyObj: StoragePayload
+    bodyObj = JSON.parse(body.toString())
+
+    expect(bodyObj.streams[0].entries[0].line).to.satisfy((string) =>
       [
-        'os=\\"Mac OS\\"',
+        'os="Mac OS"',
         'device_type=desktop',
         'country=US',
         'geohash=9yegjbpfr',
-        'country_name=\\"United States of America\\"',
+        'country_name="United States of America"',
         'method=GET',
         'status=200',
         'domain=example.com',
       ].every((bit) => string.includes(bit)),
     )
-    expect(body).to.not.include('17.110.220.180')
+    expect(bodyObj.streams[0].entries[0].line).to.not.include('17.110.220.180')
   })
 
   it('avoid fetching upstream when the URL is forwarded', async () => {
@@ -61,7 +75,11 @@ describe('request handler', () => {
     expect(await res.text()).to.equal('ok')
 
     let body = fetchMock.calls('http://loki:3100/api/prom/push')[1][1].body
-    expect(body).to.satisfy((string) =>
+
+    var bodyObj: StoragePayload
+    bodyObj = JSON.parse(body.toString())
+
+    expect(bodyObj.streams[0].entries[0].line).to.satisfy((string) =>
       [
         'status=200',
         // domain is extracted from the x-original-url header
@@ -98,8 +116,10 @@ describe('request handler', () => {
     expect(await res.text()).to.equal('ok')
 
     let body = fetchMock.calls('http://loki:3100/api/prom/push')[2][1].body
+    var bodyObj: StoragePayload
+    bodyObj = JSON.parse(body.toString())
 
-    expect(body).to.satisfy((string) =>
+    expect(bodyObj.streams[0].entries[0].line).to.satisfy((string) =>
       [
         'status=200',
         // domain is extracted from the x-original-url header
