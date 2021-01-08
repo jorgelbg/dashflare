@@ -38,6 +38,7 @@ describe('request handler', () => {
     var bodyObj: StoragePayload
     bodyObj = JSON.parse(body.toString())
 
+    // validate the payload (log line)
     expect(bodyObj.streams[0].entries[0].line).to.satisfy((string) =>
       [
         'os="Mac OS"',
@@ -48,9 +49,24 @@ describe('request handler', () => {
         'method=GET',
         'status=200',
         'domain=example.com',
+        'url=http://example.com/',
       ].every((bit) => string.includes(bit)),
     )
     expect(bodyObj.streams[0].entries[0].line).to.not.include('17.110.220.180')
+
+    // validate the label set (identifies the stream)
+    expect(bodyObj.streams[0].labels).to.satisfy((string) =>
+      [
+        'device_type="desktop"',
+        'method="GET"',
+        'status="200"',
+        'protocol="https"',
+      ].every((bit) => string.includes(bit)),
+    )
+
+    expect(bodyObj.streams[0].labels).to.not.include('url')
+    expect(bodyObj.streams[0].labels).to.not.include('geohash')
+    expect(bodyObj.streams[0].labels).to.not.include('origin')
   })
 
   it('avoid fetching upstream when the URL is forwarded', async () => {
