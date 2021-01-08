@@ -69,7 +69,7 @@ describe('request handler', () => {
     expect(bodyObj.streams[0].labels).to.not.include('origin')
   })
 
-  it('avoid fetching upstream when the URL is forwarded', async () => {
+  it('avoids fetching upstream when the URL is forwarded', async () => {
     const headers: HeadersInit = new Headers({
       host: 'dashflare.test.workers.dev',
       'x-forwarded-proto': 'https',
