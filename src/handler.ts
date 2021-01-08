@@ -34,19 +34,7 @@ let batchedEvents: Array<Hash<any>> = []
 let currentHost: string | null = ''
 let ipInfoQuotaReached = false
 
-const SKIP_LABELS = new Set([
-  'url',
-  'referer',
-  'user_agent',
-  'hostname',
-  'ip',
-  'os_version',
-  'browser_version',
-])
-
-if (EXCLUDE.ip) {
-  SKIP_LABELS.add('ip')
-}
+const INCLUDE_LABELS = new Set(['method', 'status', 'protocol', 'device_type'])
 
 const parser = new UAParser()
 
@@ -72,17 +60,21 @@ function levelFromStatus(status: number): string {
 // flushQueue pushes the existing queue of event's metadata into the backend
 async function flushQueue() {
   let event = batchedEvents[0]
-  let labels: string[] = []
+  let labels: string[] = [`host="${currentHost}"`]
   let obj: Hash<String> = {}
 
   for (let k in event) {
-    // Avoid putting the url & referer links in the label set
-    if (SKIP_LABELS.has(k)) continue
+    // Avoid putting some information in the label set
     let v = event[k]
-    if (v != undefined) {
-      obj[k] = v
+    if (v == undefined) {
+      continue
+    }
+
+    if (INCLUDE_LABELS.has(k)) {
       labels.push(`${k}="${v}"`)
     }
+
+    obj[k] = v
   }
 
   let status = parseInt(event['status'])
@@ -92,13 +84,6 @@ async function flushQueue() {
   )
 
   obj['level'] = levelFromStatus(status)
-  obj['method'] = event['method']
-  obj['url'] = event['url']
-  obj['referer'] = event['referer']
-  obj['user_agent'] = event['user_agent']
-  obj['session'] = session
-  obj['os_version'] = event['os_version']
-  obj['browser_version'] = event['browser_version']
 
   let payload = {
     streams: [
