@@ -8,7 +8,7 @@ declare global {
   }
 
   // The token is provided by cloudflare workers automatically from the secrets
-  let IPINFO_TOKEN: string
+  let IPINFO: string
 
   // The client id
   let CLIENT_ID: string

@@ -102,14 +102,14 @@ describe('enabled geolocation', async () => {
 
 describe('disabled geolocation', async () => {
   after(() => fetchMock.restore())
-  let oldToken = IPINFO_TOKEN
+  let oldToken = IPINFO
 
   before(() => {
-    IPINFO_TOKEN = ''
+    IPINFO = ''
   })
 
   after(() => {
-    IPINFO_TOKEN = oldToken
+    IPINFO = oldToken
   })
 
   it('empty result', async () => {
@@ -120,9 +120,9 @@ describe('disabled geolocation', async () => {
   })
 
   it('disabled via false', async () => {
-    IPINFO_TOKEN = 'false'
+    IPINFO = 'false'
     let res = await ipInfo('17.110.220.180')
-    IPINFO_TOKEN = ''
+    IPINFO = ''
     expect(res).to.be.empty
     expect(fetchMock.calls()).to.be.empty
   })

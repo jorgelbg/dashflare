@@ -19,8 +19,6 @@ const JAVASCRIPT_REGEX = /\.js/
 const IMAGE_REGEX = /\.(?:png|jpg|jpeg|webp|gif|ico|svg|webmanifest)/
 const CSS_REGEX = /\.css/
 
-// Used in a different file but also should be configurable
-// IPINFO_TOKEN
 const LOKI_URL = `http://${LOKI_HOST}/api/prom/push`
 
 const EXCLUDE = JSON.parse(OPTIONS) || {
@@ -84,6 +82,7 @@ async function flushQueue() {
   )
 
   obj['level'] = levelFromStatus(status)
+  obj['session'] = session
 
   let payload = {
     streams: [

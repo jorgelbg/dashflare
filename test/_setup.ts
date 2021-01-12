@@ -7,7 +7,7 @@ declare global {
   }
 
   // The token is provided by cloudflare workers automatically from the secrets
-  let IPINFO_TOKEN: string
+  let IPINFO: string
 
   // The client id
   let CLIENT_ID: string
@@ -25,7 +25,7 @@ declare global {
 }
 
 var DEFAULT_OPTIONS = {
-  IPINFO_TOKEN: 'test-token',
+  IPINFO: 'test-token',
   CLIENT_ID: 'client-id',
   LOKI_HOST: 'loki:3100',
   FINGERPRINT: 'some-uuid',

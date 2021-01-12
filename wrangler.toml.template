@@ -3,7 +3,7 @@ type = "webpack"
 workers_dev = false
 route = ""
 webpack_config = "webpack.config.js"
-vars = { OPTIONS = '{"css":true,"images":true,"js":true,"ip":true}', LOKI_HOST="$LOKI_HOST", CLIENT_ID="$CLIENT_ID", IPINFO_TOKEN="$IPINFO", FINGERPRINT="$FINGERPRINT" }
+vars = { OPTIONS = '{"css":true,"images":true,"js":true,"ip":true}', LOKI_HOST="$LOKI_HOST", CLIENT_ID="$CLIENT_ID", IPINFO="$IPINFO", FINGERPRINT="$FINGERPRINT" }
 
 routes = [
     "$DOMAIN/*",
