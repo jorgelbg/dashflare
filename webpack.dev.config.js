@@ -36,7 +36,7 @@ module.exports = {
   mode,
   plugins: [
     new webpack.DefinePlugin({
-      IPINFO_TOKEN: ipInfoToken,
+      IPINFO: ipInfoToken,
       CLIENT_ID: clientId,
       LOKI_HOST: lokiHost,
       OPTIONS: `'${excludeOptions}'`,

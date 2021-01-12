@@ -22,12 +22,9 @@ function toGeoData(res: Promise<Hash<any>>): Promise<IGeoData> {
 }
 
 async function ipInfo(ip: string): Promise<IGeoData> {
-  // If the IPINFO_TOKEN variable is empty we asssume that the geolocation has been disabled by the
+  // If the IPINFO variable is empty we assume that the geolocation has been disabled by the
   // user and avoid requesting any info from the API
-  if (
-    IPINFO_TOKEN.trim().length === 0 ||
-    IPINFO_TOKEN.trim().toLowerCase() == 'false'
-  ) {
+  if (IPINFO.trim().length === 0 || IPINFO.trim().toLowerCase() == 'false') {
     return <IGeoData>{}
   }
 
@@ -46,7 +43,7 @@ async function ipInfo(ip: string): Promise<IGeoData> {
   }
 
   const res = await fetch(url)
-  // ince in this case we can predict the size of the payload (which it is not large)
+  // in this case we can predict the size of the payload (which it is not large)
   // we're going for the pragmatic solution of reading the entire body both in production
   // and testing.
   // see https://github.com/zackargyle/service-workers/issues/135
