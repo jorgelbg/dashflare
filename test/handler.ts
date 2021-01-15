@@ -50,6 +50,7 @@ describe('request handler', () => {
         'status=200',
         'domain=example.com',
         'url=http://example.com/',
+        'duration='
       ].every((bit) => string.includes(bit)),
     )
     expect(bodyObj.streams[0].entries[0].line).to.not.include('17.110.220.180')

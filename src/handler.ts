@@ -119,6 +119,7 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
 
   let response: Response
   let url = request.headers.get('x-original-url') || request.url
+  let duration: number = 0
   let clientIP =
     request.headers.get('x-original-ip') ||
     request.headers.get('cf-connecting-ip') ||
@@ -132,7 +133,9 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   } else {
     // fetch the original request
     console.log(`Fetching origin ${request.url}`)
+    const t = performance.now()
     response = await fetch(request.url, request)
+    duration = Math.floor(performance.now() - t) // milliseconds
   }
 
   if (EXCLUDE.js && JAVASCRIPT_REGEX.test(url)) {
@@ -175,6 +178,7 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     network: '',
     client: '',
     referer_domain: '',
+    duration,
   }
 
   if (DEBUG_HEADERS) {
