@@ -20,6 +20,7 @@ jobs:
           LOKI_HOST: ${{ secrets.LOKI_HOST }}
           OPTIONS: ${{ secrets.OPTIONS }}
           IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
+          DOMAIN: 'jorgelbg.me'
 
       - name: Publish
         uses: cloudflare/wrangler-action@1.2.0
