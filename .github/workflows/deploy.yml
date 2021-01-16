@@ -27,3 +27,4 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
         env:
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
