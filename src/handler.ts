@@ -133,9 +133,9 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   } else {
     // fetch the original request
     console.log(`Fetching origin ${request.url}`)
-    const t = performance.now()
+    const t = Date.now()
     response = await fetch(request.url, request)
-    duration = Math.floor(performance.now() - t) // milliseconds
+    duration = Math.floor(Date.now() - t) // milliseconds
   }
 
   if (EXCLUDE.js && JAVASCRIPT_REGEX.test(url)) {
