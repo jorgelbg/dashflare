@@ -28,3 +28,30 @@ jobs:
         run: npm install
 
       - run: npm test
+
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Render wrangler.toml
+        uses: nowactions/envsubst@v1
+        with:
+          input: ./wrangler.toml.template
+          output: ./wrangler.toml
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          FINGERPRINT: ${{ secrets.FINGERPRINT }}
+          LOKI_HOST: ${{ secrets.LOKI_HOST }}
+          OPTIONS: ${{ secrets.OPTIONS }}
+          IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
+          DOMAIN: 'jorgelbg.me'
+
+      - name: Publish
+        uses: cloudflare/wrangler-action@1.2.0
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
