@@ -1,3 +1,5 @@
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/jorgelbg/dashflare)
+
 # dashflare
 
 Dashflare is a privacy first analytics solution for monitoring your websites. It can be self hosted
