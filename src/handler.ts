@@ -32,7 +32,13 @@ let batchedEvents: Array<Hash<any>> = []
 let currentHost: string | null = ''
 let ipInfoQuotaReached = false
 
-const INCLUDE_LABELS = new Set(['method', 'status', 'protocol', 'device_type'])
+const INCLUDE_LABELS = new Set([
+  'method',
+  'status',
+  'protocol',
+  'device_type',
+  'domain',
+])
 
 const parser = new UAParser()
 
@@ -58,7 +64,7 @@ function levelFromStatus(status: number): string {
 // flushQueue pushes the existing queue of event's metadata into the backend
 async function flushQueue() {
   let event = batchedEvents[0]
-  let labels: string[] = [`host="${currentHost}"`]
+  let labels: string[] = []
   let obj: Hash<String> = {}
 
   for (let k in event) {
