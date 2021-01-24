@@ -54,6 +54,9 @@ describe('request handler', () => {
       ].every((bit) => string.includes(bit)),
     )
     expect(bodyObj.streams[0].entries[0].line).to.not.include('17.110.220.180')
+    // the paylod doesn't contain empty key/value pairs
+    expect(bodyObj.streams[0].entries[0].line).to.not.include('""')
+    expect(bodyObj.streams[0].entries[0].line).to.not.include('= ')
 
     // validate the label set (identifies the stream)
     expect(bodyObj.streams[0].labels).to.satisfy((string) =>
