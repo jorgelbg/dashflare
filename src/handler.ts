@@ -70,7 +70,7 @@ async function flushQueue() {
   for (let k in event) {
     // Avoid putting some information in the label set
     let v = event[k]
-    if (v == undefined) {
+    if (!v) {
       continue
     }
 
