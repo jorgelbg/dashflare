@@ -47,7 +47,7 @@ jobs:
           FINGERPRINT: ${{ secrets.FINGERPRINT }}
           LOKI_HOST: ${{ secrets.LOKI_HOST }}
           OPTIONS: ${{ secrets.OPTIONS }}
-          IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
+          IPINFO: true
           DOMAIN: 'jorgelbg.me'
 
       - name: Publish
