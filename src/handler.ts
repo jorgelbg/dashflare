@@ -135,7 +135,10 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   // to the worker and that therefor the upstream should not be fetched. We use a custom header to
   // change as little as possible from the original request.
   if (request.headers.get('x-original-url') != null) {
-    response = new Response('ok', { status: 200 })
+    let statusCode: number = parseInt(
+      request.headers.get('x-original-status-code') || '200',
+    )
+    response = new Response('ok', { status: statusCode })
   } else {
     // fetch the original request
     console.log(`Fetching origin ${request.url}`)
