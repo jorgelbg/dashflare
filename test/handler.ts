@@ -83,6 +83,7 @@ describe('request handler', () => {
       'user-agent':
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9',
       'x-original-url': 'https://example.com',
+      'x-original-status-code': '400',
       referer: 'https://t.co/gJV9DEbJVy',
     })
 
@@ -102,7 +103,7 @@ describe('request handler', () => {
 
     expect(bodyObj.streams[0].entries[0].line).to.satisfy((string) =>
       [
-        'status=200',
+        'status=400',
         // domain is extracted from the x-original-url header
         'domain=example.com',
         // the referer of the original request is detected and parsed
