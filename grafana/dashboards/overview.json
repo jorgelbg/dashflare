@@ -2,6 +2,7 @@
   "annotations": {
     "list": [
       {
+        "$$hashKey": "object:32",
         "builtIn": 1,
         "datasource": "-- Grafana --",
         "enable": true,
@@ -16,7 +17,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1600738308050,
+  "iteration": 1613392282196,
   "links": [],
   "panels": [
     {
@@ -27,7 +28,7 @@
         "#FFB357",
         "#A352CC"
       ],
-      "datasource": "PromLoki",
+      "datasource": null,
       "decimals": 0,
       "esGeoPoint": "geohash",
       "esLocationName": "city",
@@ -52,7 +53,7 @@
       "mapCenter": "custom",
       "mapCenterLatitude": "30",
       "mapCenterLongitude": "-20",
-      "maxDataPoints": 1,
+      "maxDataPoints": null,
       "mouseWheelZoom": false,
       "showLegend": true,
       "stickyLabels": false,
@@ -65,10 +66,8 @@
       },
       "targets": [
         {
-          "expr": "sum(count_over_time({geohash=~\".+\", url!~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\"}[$__interval])) by (country,city)",
-          "format": "time_series",
-          "instant": false,
-          "interval": "",
+          "expr": "sum(count_over_time({domain=~\"$domain\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" | logfmt [$__interval])) by (country)",
+          "hide": false,
           "legendFormat": "{{ country }}",
           "refId": "A"
         }
@@ -86,6 +85,9 @@
       "datasource": "PromLoki",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {},
           "mappings": [],
           "thresholds": {
@@ -106,7 +108,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
+        "w": 3,
         "x": 12,
         "y": 0
       },
@@ -123,12 +125,13 @@
           "fields": "",
           "values": false
         },
+        "text": {},
         "textMode": "value"
       },
-      "pluginVersion": "7.3.0-23625edcpre",
+      "pluginVersion": "7.5.0-12096pre",
       "targets": [
         {
-          "expr": "sum(count_over_time({domain=~\"$domain\"} !~ \".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__interval]))",
+          "expr": "sum(count_over_time({domain=~\"$domain\",url!~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\"}[$__interval]))",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -144,6 +147,9 @@
       "description": "Errors are all requests where the response status code is a 4xx or 5xx.",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {},
           "mappings": [
             {
@@ -176,8 +182,8 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
-        "x": 16,
+        "w": 3,
+        "x": 15,
         "y": 0
       },
       "id": 7,
@@ -193,9 +199,10 @@
           "fields": "",
           "values": false
         },
+        "text": {},
         "textMode": "value"
       },
-      "pluginVersion": "7.3.0-23625edcpre",
+      "pluginVersion": "7.5.0-12096pre",
       "targets": [
         {
           "expr": "sum(count_over_time({status!~\"(2|3).*\",domain=~\"$domain\"}[$__interval]))",
@@ -215,10 +222,14 @@
       "description": "Cloudflare offers a free tier of 100k requests per day\nIPInfo offers a free tier of 50k requests per day\n",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {},
           "decimals": 0,
           "mappings": [
             {
+              "$$hashKey": "object:91",
               "id": 0,
               "op": "=",
               "text": "N/A",
@@ -227,7 +238,6 @@
             }
           ],
           "max": 100000,
-          "nullValueMode": "connected",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -251,8 +261,8 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
-        "x": 20,
+        "w": 3,
+        "x": 18,
         "y": 0
       },
       "id": 8,
@@ -267,9 +277,10 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": true,
+        "text": {}
       },
-      "pluginVersion": "7.3.0-23625edcpre",
+      "pluginVersion": "7.5.0-12096pre",
       "targets": [
         {
           "expr": "sum(count_over_time({status=~\".+\"}[$__interval]))",
@@ -283,6 +294,76 @@
       "timeShift": null,
       "title": "Worker Usage (100,000/24h max)",
       "type": "gauge"
+    },
+    {
+      "datasource": "PromLoki",
+      "description": "Errors are all requests where the response status code is a 4xx or 5xx.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {},
+          "mappings": [
+            {
+              "from": "",
+              "id": 0,
+              "operator": "",
+              "text": "0",
+              "to": "",
+              "type": 1,
+              "value": "-17"
+            }
+          ],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-yellow",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 21,
+        "y": 0
+      },
+      "id": 18,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "value"
+      },
+      "pluginVersion": "7.5.0-12096pre",
+      "targets": [
+        {
+          "expr": "count(sum by (session) (count_over_time({domain=~\"$domain\"} | logfmt [$__interval])))",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Unique Users",
+      "type": "stat"
     },
     {
       "alert": {
@@ -317,14 +398,16 @@
         "frequency": "1m",
         "handler": 1,
         "name": "Requests alert",
-        "noDataState": "no_data",
+        "noDataState": "alerting",
         "notifications": [
           {
             "uid": "ws_V0FdGk"
           }
         ]
       },
-      "aliasColors": {},
+      "aliasColors": {
+        "total": "light-purple"
+      },
       "bars": true,
       "dashLength": 10,
       "dashes": false,
@@ -363,12 +446,13 @@
         "alertThreshold": false
       },
       "percentage": false,
-      "pluginVersion": "7.3.0-23625edcpre",
+      "pluginVersion": "7.5.0-12096pre",
       "pointradius": 1,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [
         {
+          "$$hashKey": "object:88",
           "alias": "total",
           "bars": false,
           "fillGradient": 0,
@@ -404,7 +488,7 @@
         },
         {
           "expr": "sum (count_over_time({status=~\"2.*\"}[1h]))",
-          "hide": false,
+          "hide": true,
           "interval": "",
           "legendFormat": "total",
           "refId": "D"
@@ -416,13 +500,14 @@
           "fill": false,
           "line": false,
           "op": "lt",
-          "value": 1
+          "value": 1,
+          "visible": true
         }
       ],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Requests",
+      "title": "Requests by status",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -438,6 +523,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:169",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -446,6 +532,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:170",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -463,11 +550,15 @@
       "datasource": "PromLoki",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {
             "align": null,
             "filterable": false
           },
           "mappings": [],
+          "noValue": "direct",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -477,7 +568,7 @@
               },
               {
                 "color": "red",
-                "value": 50
+                "value": 30
               }
             ]
           }
@@ -514,10 +605,10 @@
           }
         ]
       },
-      "pluginVersion": "7.3.0-23625edcpre",
+      "pluginVersion": "7.5.0-12096pre",
       "targets": [
         {
-          "expr": "topk(10, sum(count_over_time({domain=~\"$domain\", type=~\".+\"}[$__range])) by (type, network))",
+          "expr": "topk(15, sum by (type, network, referer_domain) (count_over_time({domain=~\"$domain\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" | logfmt | path!~\"/|/index.xml|/robots.txt|//xmlrpc.php\" [$__range])))",
           "format": "table",
           "instant": true,
           "interval": "1d",
@@ -545,8 +636,17 @@
             "renameByName": {
               "Value": "Visits",
               "network": "Network",
+              "referer_domain": "Domain",
               "type": "Type"
             }
+          }
+        },
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [],
+            "match": "all",
+            "type": "include"
           }
         }
       ],
@@ -556,6 +656,9 @@
       "datasource": "PromLoki",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {
             "align": null,
             "filterable": false
@@ -606,10 +709,10 @@
           }
         ]
       },
-      "pluginVersion": "7.3.0-23625edcpre",
+      "pluginVersion": "7.5.0-12096pre",
       "targets": [
         {
-          "expr": "topk(15, sum(count_over_time({domain=~\"$domain\", path!=\"/\", path!=\"/robots.txt\", path!=\"/index.xml\", status=\"200\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__range])) by (path))",
+          "expr": "topk(15, sum by (path) (count_over_time({domain=~\"$domain\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" | logfmt | path!~\"/|/index.xml|/robots.txt|//xmlrpc.php\" [$__range])))",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -642,6 +745,9 @@
       "datasource": "PromLoki",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {
             "align": null,
             "filterable": false
@@ -692,10 +798,10 @@
           }
         ]
       },
-      "pluginVersion": "7.3.0-23625edcpre",
+      "pluginVersion": "7.5.0-12096pre",
       "targets": [
         {
-          "expr": "topk(5, sum(count_over_time({domain=~\"$domain\", status=\"200\", browser=~\".+\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__range])) by (browser))",
+          "expr": "topk(15, sum by (browser) (count_over_time({domain=~\"$domain\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" | logfmt | path!~\"/|/index.xml|/robots.txt|//xmlrpc.php\" [$__range])))",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -730,6 +836,9 @@
       "datasource": "PromLoki",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {
             "align": null,
             "filterable": false
@@ -765,7 +874,7 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 8,
         "x": 16,
         "y": 18
@@ -780,10 +889,10 @@
           }
         ]
       },
-      "pluginVersion": "7.3.0-23625edcpre",
+      "pluginVersion": "7.5.0-12096pre",
       "targets": [
         {
-          "expr": "topk(5, sum(count_over_time({domain=~\"$domain\", status=\"200\", os=~\".+\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__range])) by (os))",
+          "expr": "topk(15, sum by (os) (count_over_time({domain=~\"$domain\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" | logfmt | path!~\"/|/index.xml|/robots.txt|//xmlrpc.php\" [$__range])))",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -818,6 +927,9 @@
       "datasource": "PromLoki",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {
             "align": null,
             "filterable": false
@@ -868,10 +980,10 @@
           }
         ]
       },
-      "pluginVersion": "7.3.0-23625edcpre",
+      "pluginVersion": "7.5.0-12096pre",
       "targets": [
         {
-          "expr": "topk(10, sum(count_over_time({domain=~\"$domain\", path!=\"/robots.txt\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__range])) by (country_name))",
+          "expr": "topk(15, sum by (country_name) (count_over_time({domain=~\"$domain\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" | logfmt | path!~\"/|/index.xml|/robots.txt|//xmlrpc.php\" [$__range])))",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -903,6 +1015,9 @@
       "datasource": "PromLoki",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {
             "align": null,
             "filterable": false
@@ -960,9 +1075,9 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
+        "w": 8,
         "x": 16,
-        "y": 24
+        "y": 23
       },
       "id": 17,
       "options": {
@@ -974,10 +1089,10 @@
           }
         ]
       },
-      "pluginVersion": "7.3.0-23625edcpre",
+      "pluginVersion": "7.5.0-12096pre",
       "targets": [
         {
-          "expr": "topk(5, sum(count_over_time({domain=~\"$domain\", status=\"200\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" [$__range])) by (device_type))",
+          "expr": "topk(15, sum by (device_type) (count_over_time({domain=~\"$domain\"} !~\".*(ico|js|jpg|jpeg|png|webp|css|webmanifest)\" | logfmt | path!~\"/|/index.xml|/robots.txt|//xmlrpc.php\" [$__range])))",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -1007,16 +1122,186 @@
         }
       ],
       "type": "table"
+    },
+    {
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "graph": false,
+              "legend": false,
+              "tooltip": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 11,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 27
+      },
+      "id": 20,
+      "options": {
+        "graph": {},
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltipOptions": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "7.5.0-11266pre",
+      "targets": [
+        {
+          "expr": "sum by (domain) (quantile_over_time(.50, {domain=~\"$domain\"} | logfmt | unwrap duration [$__interval]))",
+          "legendFormat": "{{ domain }}",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Response Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "PromLoki",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Count"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 27
+      },
+      "id": 21,
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Count"
+          }
+        ]
+      },
+      "pluginVersion": "7.5.0-12096pre",
+      "targets": [
+        {
+          "expr": "topk(15, sum by (path) (count_over_time({domain=~\"$domain\", status=\"404\"} | logfmt [$__range])))",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Top 404s",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Value": "Count",
+              "path": "Path"
+            }
+          }
+        }
+      ],
+      "type": "table"
     }
   ],
   "refresh": false,
-  "schemaVersion": 26,
+  "schemaVersion": 27,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
-        "allValue": null,
+        "allValue": ".*",
         "current": {
           "selected": true,
           "text": [
@@ -1028,6 +1313,8 @@
         },
         "datasource": "Loki",
         "definition": "label_values(domain)",
+        "description": null,
+        "error": null,
         "hide": 0,
         "includeAll": true,
         "label": null,
@@ -1047,6 +1334,8 @@
       },
       {
         "datasource": "PromLoki",
+        "description": null,
+        "error": null,
         "filters": [],
         "hide": 0,
         "label": "",
@@ -1074,7 +1363,7 @@
     ]
   },
   "timezone": "",
-  "title": "jorgelbg.me",
+  "title": "Overview",
   "uid": "eVzGT0_Wk",
-  "version": 50
+  "version": 91
 }
