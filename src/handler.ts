@@ -125,27 +125,10 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
 
   let response: Response
   let url = request.headers.get('x-original-url') || request.url
-  let duration: number = 0
-  let clientIP =
-    request.headers.get('x-original-ip') ||
-    request.headers.get('cf-connecting-ip') ||
-    ''
+  let clientIP = request.headers.get('cf-connecting-ip') || ''
 
-  // If the request contains a 'x-original-url' header we understand that this request is forwarded
-  // to the worker and that therefor the upstream should not be fetched. We use a custom header to
-  // change as little as possible from the original request.
-  if (request.headers.get('x-original-url') != null) {
-    let statusCode: number = parseInt(
-      request.headers.get('x-original-status-code') || '200',
-    )
-    response = new Response('ok', { status: statusCode })
-  } else {
-    // fetch the original request
-    console.log(`Fetching origin ${request.url}`)
-    const t = Date.now()
-    response = await fetch(request.url, request)
-    duration = Math.floor(Date.now() - t) // milliseconds
-  }
+  // On the Github tracker mode, we always return an HTTP_OK (200) status code.
+  response = new Response('ok', { status: 200 })
 
   if (EXCLUDE.js && JAVASCRIPT_REGEX.test(url)) {
     return response
@@ -159,8 +142,8 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     return response
   }
 
-  let parsed = new URL(url)
   let userAgent = request.headers.get('user-agent')
+  let githubReferer = request.headers.get('referer')
 
   parser.setUA(`${userAgent}`)
 
@@ -168,14 +151,7 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     method: request.method,
     url: url,
     status: response.status,
-    referer: request.headers.get('referer'),
     user_agent: userAgent,
-    protocol: request.headers.get('x-forwarded-proto'),
-    domain: parsed.domain,
-    origin: parsed.origin,
-    path: parsed.path,
-    hash: parsed.hash,
-    query: parsed.search,
     browser: parser.getBrowser().name,
     browser_version: parser.getBrowser().major,
     os: parser.getOS().name,
@@ -183,11 +159,8 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     // the ua-parser-js library identify desktop clients as an empty device type
     device_type: parser.getDevice().type ? parser.getDevice().type : 'desktop',
     country: request.headers.get('cf-ipcountry'),
-    type: '',
-    network: '',
-    client: '',
-    referer_domain: '',
-    duration,
+    owner: '',
+    repo: '',
   }
 
   if (DEBUG_HEADERS) {
@@ -214,20 +187,10 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     }
   }
 
-  if (request.headers.get('referer')) {
-    let refData: any = await new Promise((resolve) => {
-      const ref = request.headers.get('referer') || ''
-      referrer.parse(request.url, ref, function (err: any, info: any) {
-        // The inbound library doesn't shortens all links from a referer URL only some
-        // transformations are applied. We first get only the domain from the URL and then run it
-        // through the shorten.domain function.
-        let domain = shorten.domain(new URL(ref).domain)
-        resolve({ ...info['referrer'], domain })
-      })
-    })
+  if (githubReferer != null && githubReferer.indexOf('github.com') != -1) {
+    let parts = githubReferer.split('/')
 
-    const { type, network, client, domain } = refData
-    labels = { ...labels, type, network, client, referer_domain: domain }
+    labels = { ...labels, owner: parts[3], repo: parts[4] }
   }
 
   batchedEvents.push(labels)

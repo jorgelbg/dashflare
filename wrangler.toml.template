@@ -1,13 +1,9 @@
-name = "dashflare"
+name = "github"
 type = "webpack"
-workers_dev = false
+workers_dev = true
 route = ""
 webpack_config = "webpack.config.js"
 vars = { OPTIONS = '{"css":true,"images":true,"js":true,"ip":true}', LOKI_HOST="$LOKI_HOST", CLIENT_ID="$CLIENT_ID", IPINFO="$IPINFO", FINGERPRINT="$FINGERPRINT" }
-
-routes = [
-    "$DOMAIN/*",
-]
 
 [env.dev]
 webpack_config = "webpack.dev.config.js"
