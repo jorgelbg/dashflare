@@ -44,7 +44,6 @@ describe('request handler', () => {
         'os="Mac OS"',
         'device_type=desktop',
         'country=US',
-        'geohash=9yegjbpfr',
         'country_name="United States of America"',
         'method=GET',
         'status=200',
@@ -70,7 +69,6 @@ describe('request handler', () => {
     )
 
     expect(bodyObj.streams[0].labels).to.not.include('url')
-    expect(bodyObj.streams[0].labels).to.not.include('geohash')
     expect(bodyObj.streams[0].labels).to.not.include('origin')
   })
 
@@ -149,7 +147,6 @@ describe('request handler', () => {
         // the referer of the original request is detected and parsed
         'network=twitter',
         'type=social',
-        'geohash=9yegjbpfr',
       ].every((bit) => string.includes(bit)),
     )
   })

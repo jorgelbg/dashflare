@@ -1,5 +1,4 @@
 import { toLabels } from './headers'
-import { ipInfo } from './ipinfo'
 import { referrer, shorten } from 'inbound'
 import { URL } from '@cliqz/url-parser'
 import { getName } from 'country-list'
@@ -7,7 +6,6 @@ import { UAParser } from 'ua-parser-js'
 import { hash_hex, string_to_u8 } from 'siphash'
 import logfmt from 'logfmt'
 // import { parse } from './referer'
-import { encode } from 'ngeohash'
 
 let sessionKey = string_to_u8(FINGERPRINT)
 
@@ -30,7 +28,6 @@ const EXCLUDE = JSON.parse(OPTIONS) || {
 
 let batchedEvents: Array<Hash<any>> = []
 let currentHost: string | null = ''
-let ipInfoQuotaReached = false
 
 const INCLUDE_LABELS = new Set([
   'method',
@@ -161,6 +158,7 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
 
   let parsed = new URL(url)
   let userAgent = request.headers.get('user-agent')
+  let countryCode = request.headers.get('cf-ipcountry') || 'unknown'
 
   parser.setUA(`${userAgent}`)
 
@@ -182,12 +180,13 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     os_version: parser.getOS().version,
     // the ua-parser-js library identify desktop clients as an empty device type
     device_type: parser.getDevice().type ? parser.getDevice().type : 'desktop',
-    country: request.headers.get('cf-ipcountry'),
+    country: countryCode,
     type: '',
     network: '',
     client: '',
     referer_domain: '',
     duration,
+    country_name: getName(countryCode),
   }
 
   if (DEBUG_HEADERS) {
@@ -196,21 +195,6 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
       ...labels,
       ...toLabels(request.headers, 'req'),
       ...toLabels(response.headers, 'res'),
-    }
-  }
-
-  if (ipInfoQuotaReached == false && clientIP.length > 0) {
-    try {
-      const ip = await ipInfo(clientIP)
-
-      let geohash = encode(ip.lat, ip.lon)
-      let country_name = `${getName(ip.country)}`
-
-      labels = { ...labels, ...ip, ...{ country_name, geohash } }
-    } catch (error) {
-      // We catched 429 Too Many Requests, this means that we reached our current
-      // ipinfo quota. Avoid making extra requests.
-      ipInfoQuotaReached = true
     }
   }
 
