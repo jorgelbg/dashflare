@@ -52,6 +52,6 @@
     "remove": "^0.1.5",
     "siphash": "^1.1.0",
     "tldextract": "0.0.5",
-    "ua-parser-js": "^0.7.21"
+    "ua-parser-js": "^0.7.33"
   }
 }
